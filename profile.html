@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Profile — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.profile-layout { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); display: grid; grid-template-columns: 280px 1fr; background: var(--cream); }
+.profile-sidebar { background: var(--white); border-right: 1px solid var(--fog); padding: 48px 0; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+.profile-avatar { text-align: center; padding: 0 32px 40px; border-bottom: 1px solid var(--fog); }
+.avatar-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block; background: var(--fog); }
+.avatar-name { font-size: 15px; font-weight: 700; color: var(--ink); }
+.avatar-email { font-size: 11px; color: var(--stone); margin-top: 4px; }
+.profile-nav { padding: 24px 0; }
+.profile-nav-link { display: flex; align-items: center; gap: 12px; padding: 14px 32px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); transition: color .15s, background .15s; }
+.profile-nav-link:hover { color: var(--ink); background: var(--cream); }
+.profile-nav-link.active { color: var(--ink); background: var(--cream); border-left: 2px solid var(--brown); }
+.profile-main { padding: 60px; }
+.profile-section { display: none; }
+.profile-section.active { display: block; }
+.section-card { background: var(--white); padding: 40px; margin-bottom: 24px; }
+.section-card-title { font-size: 10px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--stone); margin-bottom: 28px; }
+.address-card { border: 1px solid var(--fog); padding: 20px; margin-bottom: 12px; position: relative; }
+.address-card.default { border-color: var(--brown); }
+.address-default-tag { position: absolute; top: 16px; right: 16px; font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; background: var(--brown); color: var(--white); padding: 4px 10px; }
+.payment-saved { border: 1px solid var(--fog); padding: 20px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; }
+.tryon-gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+.tryon-item { aspect-ratio: 3/4; background: var(--fog); overflow: hidden; position: relative; }
+.tryon-item img { width: 100%; height: 100%; object-fit: cover; }
+.tryon-overlay { position: absolute; inset: 0; background: rgba(46,46,46,.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; }
+.tryon-item:hover .tryon-overlay { opacity: 1; }
+.notif-row { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--fog); }
+.notif-row:last-child { border-bottom: none; }
+.toggle-switch { position: relative; width: 44px; height: 24px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track { position: absolute; inset: 0; background: var(--fog); border-radius: 24px; cursor: none; transition: background .2s; }
+.toggle-thumb { position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: var(--white); border-radius: 50%; transition: transform .2s; }
+.toggle-switch input:checked + .toggle-track { background: var(--brown); }
+.toggle-switch input:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
+</style>
+</head>
+<body>
+<div class="profile-layout">
+  <!-- Sidebar -->
+  <div class="profile-sidebar">
+    <div class="profile-avatar">
+      <img src="https://placehold.co/160x160/d1d0cb/6e6353?text=SM" alt="Sara" class="avatar-img"/>
+      <div class="avatar-name">Sarah Mohamed</div>
+      <div class="avatar-email">sara@example.com</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px;justify-content:center;width:100%;" onclick="document.getElementById('avatar-upload').click()">Change Photo</button>
+      <input type="file" id="avatar-upload" accept="image/*" style="display:none;"/>
+    </div>
+    <nav class="profile-nav">
+      <a class="profile-nav-link active" href="#" onclick="showSection('personal',this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Personal Info
+      </a>
+      <a class="profile-nav-link" href="#" onclick="showSection('addresses',this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Addresses
+      </a>
+      <a class="profile-nav-link" href="#" onclick="showSection('payments',this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payment Methods
+      </a>
+      <a class="profile-nav-link" href="#" onclick="showSection('notifications',this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </a>
+      <a class="profile-nav-link" href="#" onclick="showSection('tryons',this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg>
+        My Try-Ons
+      </a>
+      <a class="profile-nav-link" href="orders.html" style="margin-top:8px;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        My Orders
+      </a>
+      <a class="profile-nav-link" href="wishlist.html">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Wishlist
+      </a>
+      <div style="height:1px;background:var(--fog);margin:16px 32px;"></div>
+      <a class="profile-nav-link" href="#" onclick="showSection('danger',this)" style="color:var(--danger);">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Danger Zone
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main -->
+  <div class="profile-main">
+    <h1 style="font-family:'Anton',sans-serif;font-size:40px;letter-spacing:-.02em;color:var(--ink);margin-bottom:8px;">MY PROFILE</h1>
+    <p style="font-size:13px;color:var(--stone);margin-bottom:40px;">Manage your account settings and preferences.</p>
+
+    <!-- Personal Info -->
+    <div class="profile-section active" id="sec-personal">
+      <div class="section-card">
+        <div class="section-card-title">Personal Information</div>
+        <div style="display:grid;gap:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" value="Sarah"/></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" value="Mohamed"/></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" value="sara@example.com"/></div>
+          <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" type="tel" value="+20 123 456 7890"/></div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <select class="form-select"><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input class="form-input" type="date" value="1995-06-15"/>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:28px;justify-content:center;" onclick="alert('Changes saved! (demo only)')">Save Changes</button>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-title">Change Password</div>
+        <div style="display:grid;gap:16px;max-width:440px;">
+          <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" placeholder="Enter current password"/></div>
+          <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" placeholder="Create new password"/></div>
+          <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" type="password" placeholder="Re-enter new password"/></div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:20px;justify-content:center;" onclick="alert('Password updated! (demo only)')">Update Password</button>
+      </div>
+    </div>
+
+    <!-- Addresses -->
+    <div class="profile-section" id="sec-addresses">
+      <div class="section-card">
+        <div class="section-card-title">Saved Addresses</div>
+        <div class="address-card default">
+          <div class="address-default-tag">Default</div>
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">Home</div>
+          <div style="font-size:13px;color:var(--stone);line-height:1.7;">Sarah Mohamed<br/>15 Nile Street, Dokki<br/>Giza, Cairo 12311<br/>+20 123 456 7890</div>
+          <div style="display:flex;gap:12px;margin-top:16px;">
+            <button class="btn btn-ghost btn-sm" onclick="alert('Edit address (demo only)')">Edit</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="alert('Address deleted (demo only)')">Delete</button>
+          </div>
+        </div>
+        <div class="address-card">
+          <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">Work Office</div>
+          <div style="font-size:13px;color:var(--stone);line-height:1.7;">Sarah Mohamed<br/>Nile Tower, Floor 8, Nile Corniche Road<br/>Cairo 11511<br/>+20 123 456 7890</div>
+          <div style="display:flex;gap:12px;margin-top:16px;">
+            <button class="btn btn-ghost btn-sm" onclick="alert('Edit address (demo only)')">Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="alert('Set as default (demo only)')">Set as Default</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger);">Delete</button>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:16px;" onclick="alert('Add address form (demo only)')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New Address
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="profile-section" id="sec-payments">
+      <div class="section-card">
+        <div class="section-card-title">Saved Payment Methods</div>
+        <div class="payment-saved">
+          <div style="border:1px solid var(--fog);padding:6px 12px;font-size:10px;font-weight:700;color:var(--stone);letter-spacing:.1em;">VISA</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:var(--ink);">Visa •••• 4242</div>
+            <div style="font-size:11px;color:var(--stone);margin-top:2px;">Expires 09/27</div>
+          </div>
+          <span style="font-size:9px;background:var(--brown);color:var(--white);padding:4px 10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Default</span>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Remove card (demo only)')">Remove</button>
+        </div>
+        <div class="payment-saved">
+          <div style="border:1px solid var(--fog);padding:6px 12px;font-size:10px;font-weight:700;color:var(--stone);letter-spacing:.1em;">MC</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:var(--ink);">Mastercard •••• 8881</div>
+            <div style="font-size:11px;color:var(--stone);margin-top:2px;">Expires 12/26</div>
+          </div>
+          <button class="btn btn-ghost btn-sm">Set Default</button>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Remove card (demo only)')">Remove</button>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:16px;" onclick="alert('Add card form (demo only)')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add New Card
+        </button>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="profile-section" id="sec-notifications">
+      <div class="section-card">
+        <div class="section-card-title">Notification Preferences</div>
+        <div class="notif-row">
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Order Updates</div><div style="font-size:12px;color:var(--stone);margin-top:2px;">Shipping, delivery, and return notifications</div></div>
+          <label class="toggle-switch"><input type="checkbox" checked onchange="this.closest('.toggle-switch').querySelector('.toggle-track .toggle-thumb').style.transform = this.checked ? 'translateX(20px)' : ''"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="notif-row">
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Price Drop Alerts</div><div style="font-size:12px;color:var(--stone);margin-top:2px;">Get notified when wishlist items go on sale</div></div>
+          <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="notif-row">
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);">New Arrivals</div><div style="font-size:12px;color:var(--stone);margin-top:2px;">Weekly new collection and restock alerts</div></div>
+          <label class="toggle-switch"><input type="checkbox"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="notif-row">
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Promotions &amp; Offers</div><div style="font-size:12px;color:var(--stone);margin-top:2px;">Exclusive member discounts and sale events</div></div>
+          <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="notif-row">
+          <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Review Reminders</div><div style="font-size:12px;color:var(--stone);margin-top:2px;">Remind me to review delivered items</div></div>
+          <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Try-Ons Gallery -->
+    <div class="profile-section" id="sec-tryons">
+      <div class="section-card">
+        <div class="section-card-title">My Virtual Try-Ons (12)</div>
+        <div class="tryon-gallery">
+          <div class="tryon-item"><img src="https://placehold.co/400x533/d1d0cb/6e6353?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/a2a092/2e2e2e?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/8a887e/fafaf8?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/6e6353/f4f3ef?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/2e2e2e/d1d0cb?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/d1d0cb/8a887e?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/a2a092/6e6353?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+          <div class="tryon-item"><img src="https://placehold.co/400x533/f4f3ef/6e6353?text=Try-On" alt=""/><div class="tryon-overlay"><a href="try-on.html" class="overlay-btn" style="font-size:10px;">View</a></div></div>
+        </div>
+        <div style="text-align:center;margin-top:24px;">
+          <a href="try-on.html" class="btn btn-ghost">Start New Try-On</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="profile-section" id="sec-danger">
+      <div class="section-card" style="border:1px solid rgba(231,76,60,.2);">
+        <div class="section-card-title" style="color:var(--danger);">Danger Zone</div>
+        <div style="display:flex;flex-direction:column;gap:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:20px;border:1px solid var(--fog);">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink);">Deactivate Account</div>
+              <div style="font-size:12px;color:var(--stone);margin-top:4px;">Temporarily disable your account. You can reactivate at any time.</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="confirm('Deactivate your account?') && alert('Account deactivated (demo only)')">Deactivate</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:20px;border:1px solid rgba(231,76,60,.3);background:rgba(231,76,60,.02);">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--danger);">Delete Account</div>
+              <div style="font-size:12px;color:var(--stone);margin-top:4px;">Permanently delete your account and all associated data. This cannot be undone.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="confirm('This action is permanent and cannot be undone. Are you sure?') && alert('Account deletion requested (demo only)')">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+if (!FashionAPI.requireAuth()) { /* redirecting */ }
+
+function showSection(name, link) {
+  document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.profile-nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  if (link) link.classList.add('active');
+  return false;
+}
+
+// Toggle switches
+document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+  toggle.addEventListener('change', function() {
+    const thumb = this.closest('.toggle-switch').querySelector('.toggle-thumb');
+    const track = this.closest('.toggle-switch').querySelector('.toggle-track');
+    thumb.style.transform = this.checked ? 'translateX(20px)' : '';
+    track.style.background = this.checked ? 'var(--brown)' : 'var(--fog)';
+  });
+  const thumb = toggle.closest('.toggle-switch').querySelector('.toggle-thumb');
+  const track = toggle.closest('.toggle-switch').querySelector('.toggle-track');
+  if (toggle.checked) { thumb.style.transform = 'translateX(20px)'; track.style.background = 'var(--brown)'; }
+});
+
+// Load user
+async function loadUser() {
+  try {
+    const u = await FashionAPI.get('/auth/me');
+    const [fn, ...ln] = u.name.split(' ');
+    document.querySelector('.avatar-name').textContent = u.name;
+    document.querySelector('.avatar-email').textContent = u.email;
+    document.querySelector('.avatar-img').src = u.avatar || `https://placehold.co/160x160/d1d0cb/6e6353?text=${FashionAPI.initials(u.name)}`;
+
+    // Fill personal info form
+    const inputs = document.querySelectorAll('#sec-personal .form-input, #sec-personal .form-select');
+    inputs[0].value = fn || '';
+    inputs[1].value = ln.join(' ') || '';
+    inputs[2].value = u.email || '';
+    inputs[3].value = u.phone || '';
+  } catch(e) {}
+}
+
+// Save personal info
+async function savePersonalInfo() {
+  const inputs = document.querySelectorAll('#sec-personal .form-input, #sec-personal .form-select');
+  const firstName = inputs[0].value.trim();
+  const lastName  = inputs[1].value.trim();
+  const phone     = inputs[3].value.trim();
+  try {
+    await FashionAPI.put('/auth/me', { name: `${firstName} ${lastName}`.trim(), phone });
+    const u = FashionAPI.user;
+    if (u) { u.name = `${firstName} ${lastName}`.trim(); localStorage.setItem('fashionai_user', JSON.stringify(u)); }
+    document.querySelector('.avatar-name').textContent = `${firstName} ${lastName}`.trim();
+    window.fashionAI?.toast('Changes saved', 'success');
+  } catch(e) {
+    window.fashionAI?.toast(e.message, 'error');
+  }
+}
+
+// Change password
+async function changePassword() {
+  const pwInputs = document.querySelectorAll('#sec-personal .form-input[type=password]');
+  const current = pwInputs[0].value;
+  const newPw   = pwInputs[1].value;
+  const confirm = pwInputs[2].value;
+  if (!current || !newPw) { window.fashionAI?.toast('Please fill in all fields', 'error'); return; }
+  if (newPw !== confirm)  { window.fashionAI?.toast('Passwords do not match', 'error'); return; }
+  try {
+    await FashionAPI.put('/auth/change-password', { currentPassword: current, newPassword: newPw });
+    pwInputs[0].value = pwInputs[1].value = pwInputs[2].value = '';
+    window.fashionAI?.toast('Password updated', 'success');
+  } catch(e) {
+    window.fashionAI?.toast(e.message, 'error');
+  }
+}
+
+// Addresses
+async function loadAddresses() {
+  try {
+    const addrs = await FashionAPI.get('/users/me/addresses');
+    const container = document.querySelector('#sec-addresses .section-card');
+    const title = container.querySelector('.section-card-title');
+    const btn   = container.querySelector('.btn-ghost:last-child');
+    const addrHTML = addrs.map(a => `
+      <div class="address-card ${a.is_default ? 'default' : ''}">
+        ${a.is_default ? '<div class="address-default-tag">Default</div>' : ''}
+        <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;">${a.label}</div>
+        <div style="font-size:13px;color:var(--stone);line-height:1.7;">${a.first_name} ${a.last_name}<br/>${a.street}<br/>${a.city}, ${a.governorate}${a.postal_code ? ' ' + a.postal_code : ''}<br/>${a.phone || ''}</div>
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button class="btn btn-ghost btn-sm" onclick="deleteAddress(${a.id})">Delete</button>
+        </div>
+      </div>`).join('');
+    // Re-render address cards
+    container.querySelectorAll('.address-card').forEach(c => c.remove());
+    title.insertAdjacentHTML('afterend', addrHTML);
+  } catch(e) {}
+}
+
+async function deleteAddress(id) {
+  if (!confirm('Delete this address?')) return;
+  try {
+    await FashionAPI.del('/users/me/addresses/' + id);
+    loadAddresses();
+    window.fashionAI?.toast('Address deleted');
+  } catch(e) {
+    window.fashionAI?.toast(e.message, 'error');
+  }
+}
+
+// Wire up save buttons
+document.querySelectorAll('#sec-personal .btn-primary').forEach(btn => {
+  btn.addEventListener('click', savePersonalInfo);
+  btn.removeAttribute('onclick');
+});
+document.querySelectorAll('#sec-personal .btn-ghost').forEach(btn => {
+  btn.addEventListener('click', changePassword);
+  btn.removeAttribute('onclick');
+});
+
+loadUser();
+loadAddresses();
+</script>
+</body>
+</html>

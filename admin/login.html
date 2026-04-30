@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Login — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../style.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ink); min-height: 100vh; display: flex; flex-direction: column; cursor: none; font-family: 'Quicksand', sans-serif; }
+
+/* Grain */
+body::before { content: ''; position: fixed; inset: 0; z-index: 9997; pointer-events: none; opacity: .03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 180px 180px; }
+
+/* Background gradient */
+.admin-login-bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse at 20% 80%, rgba(110,99,83,.14) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(110,99,83,.08) 0%, transparent 45%); }
+
+/* Layout */
+.admin-login-wrap { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+/* Visual side */
+.admin-visual { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 48px 56px; border-right: 1px solid rgba(209,208,203,.08); }
+.admin-brand { display: flex; flex-direction: column; gap: 4px; }
+.admin-brand-name { font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: .06em; color: var(--white); }
+.admin-brand-sub { font-size: 9px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--stone); }
+.admin-visual-tagline { }
+.admin-visual-tagline h2 { font-family: 'Anton', sans-serif; font-size: clamp(40px, 4.5vw, 72px); line-height: .9; letter-spacing: -.02em; color: var(--white); margin-bottom: 20px; }
+.admin-visual-tagline p { font-size: 13px; color: var(--stone); line-height: 1.75; max-width: 380px; }
+.admin-visual-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.stat-cell { background: rgba(255,255,255,.04); border: 1px solid rgba(209,208,203,.08); padding: 20px; }
+.stat-val { font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: -.02em; color: var(--white); }
+.stat-lbl { font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); margin-top: 4px; }
+
+/* Form side */
+.admin-form-side { width: 480px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 48px 56px; }
+.admin-form-wrap { width: 100%; }
+.admin-form-label { font-size: 10px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--brown); margin-bottom: 12px; display: block; }
+.admin-form-title { font-family: 'Anton', sans-serif; font-size: 40px; letter-spacing: -.02em; color: var(--white); margin-bottom: 8px; }
+.admin-form-sub { font-size: 13px; color: var(--stone); line-height: 1.6; margin-bottom: 40px; }
+
+/* Inputs */
+.admin-field { margin-bottom: 20px; }
+.admin-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--pebble); margin-bottom: 8px; }
+.admin-input { width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(209,208,203,.14); padding: 16px 18px; font-size: 13px; color: var(--white); font-family: 'Quicksand', sans-serif; outline: none; transition: border-color .2s, background .2s; }
+.admin-input::placeholder { color: rgba(138,136,126,.5); }
+.admin-input:focus { border-color: rgba(110,99,83,.6); background: rgba(255,255,255,.09); }
+.admin-input.error { border-color: rgba(192,57,43,.6); }
+
+/* Password wrapper */
+.pw-wrap { position: relative; }
+.pw-toggle { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--stone); transition: color .2s; padding: 0; display: flex; }
+.pw-toggle:hover { color: var(--white); }
+
+/* Error message */
+.field-error { font-size: 11px; color: var(--danger); margin-top: 6px; display: none; }
+.field-error.visible { display: block; }
+
+/* Auth error banner */
+.auth-error { background: rgba(192,57,43,.12); border: 1px solid rgba(192,57,43,.3); padding: 14px 18px; font-size: 12px; color: #e87b72; line-height: 1.6; margin-bottom: 24px; display: none; }
+.auth-error.visible { display: block; }
+
+/* 2FA panel */
+.twofa-panel { display: none; }
+.twofa-panel.visible { display: block; }
+.twofa-digits { display: flex; gap: 8px; margin: 20px 0; }
+.twofa-digit { width: 48px; height: 60px; background: rgba(255,255,255,.06); border: 1px solid rgba(209,208,203,.14); text-align: center; font-size: 22px; font-weight: 700; color: var(--white); font-family: 'Quicksand', sans-serif; outline: none; transition: border-color .2s; }
+.twofa-digit:focus { border-color: rgba(110,99,83,.6); }
+
+/* Submit button */
+.admin-submit { width: 100%; background: var(--brown); color: var(--white); border: 1px solid var(--brown); padding: 18px; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; margin-top: 28px; transition: background .2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.admin-submit:hover { background: var(--stone); border-color: var(--stone); }
+.admin-submit:disabled { opacity: .5; }
+
+/* Divider */
+.admin-divider { display: flex; align-items: center; gap: 16px; margin: 28px 0 24px; }
+.admin-divider::before, .admin-divider::after { content: ''; flex: 1; height: 1px; background: rgba(209,208,203,.1); }
+.admin-divider span { font-size: 10px; color: var(--stone); letter-spacing: .12em; text-transform: uppercase; }
+
+/* Remember / forgot row */
+.login-options { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.login-options label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--stone); }
+.login-options input[type=checkbox] { accent-color: var(--brown); }
+.login-options a { font-size: 12px; color: var(--brown); text-decoration: underline; }
+
+/* Activity indicator */
+.activity-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 6px; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* Security badge */
+.security-badge { display: flex; align-items: center; gap: 8px; margin-top: 24px; padding: 12px 16px; border: 1px solid rgba(209,208,203,.08); background: rgba(255,255,255,.02); }
+.security-badge span { font-size: 11px; color: var(--stone); line-height: 1.5; }
+
+/* Back link */
+.back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--stone); margin-bottom: 48px; transition: color .2s; }
+.back-link:hover { color: var(--white); }
+
+/* Cursor */
+.cursor { position: fixed; top: 0; left: 0; z-index: 9999; width: 12px; height: 12px; background: var(--white); border-radius: 50%; pointer-events: none; transform: translate(-50%,-50%); transition: width .2s cubic-bezier(.23,1,.32,1), height .2s cubic-bezier(.23,1,.32,1), background .2s; }
+.cursor.hovering { width: 40px; height: 40px; background: transparent; border: 1.5px solid rgba(255,255,255,.5); }
+.cursor-trail { position: fixed; top: 0; left: 0; z-index: 9998; width: 32px; height: 32px; border: 1px solid rgba(209,208,203,.2); border-radius: 50%; pointer-events: none; transform: translate(-50%,-50%); transition: transform .4s cubic-bezier(.23,1,.32,1); opacity: .4; }
+</style>
+</head>
+<body>
+<div class="admin-login-bg"></div>
+
+<div class="admin-login-wrap">
+
+  <!-- Visual side -->
+  <div class="admin-visual">
+    <div class="admin-brand">
+      <div class="admin-brand-name">FASHIONAI</div>
+      <div class="admin-brand-sub">Admin Panel</div>
+    </div>
+
+    <div class="admin-visual-tagline">
+      <h2>MANAGE YOUR<br/>FASHION<br/>EMPIRE</h2>
+      <p>Full control over your store — orders, products, inventory, analytics, and team — all in one place.</p>
+    </div>
+
+    <div>
+      <div class="admin-visual-stats">
+        <div class="stat-cell">
+          <div class="stat-val">147</div>
+          <div class="stat-lbl">Orders today</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">EGP 82K</div>
+          <div class="stat-lbl">Revenue today</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">60K+</div>
+          <div class="stat-lbl">Products live</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;font-size:11px;color:var(--stone);display:flex;align-items:center;">
+        <span class="activity-dot"></span>
+        Live store data · admin@fashionai.com / admin123
+      </div>
+    </div>
+  </div>
+
+  <!-- Form side -->
+  <div class="admin-form-side">
+    <div class="admin-form-wrap">
+
+      <a href="../index.html" class="back-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back to storefront
+      </a>
+
+      <!-- Login form -->
+      <div id="login-panel">
+        <span class="admin-form-label">Restricted area</span>
+        <h1 class="admin-form-title">ADMIN<br/>SIGN IN</h1>
+        <p class="admin-form-sub">For authorised team members only. All access is logged.</p>
+
+        <div class="auth-error" id="auth-error">
+          Incorrect email or password. <strong>2 attempts remaining</strong> before your account is locked.
+        </div>
+
+        <div class="admin-field">
+          <label class="admin-label" for="admin-email">Admin Email</label>
+          <input class="admin-input" type="email" id="admin-email" placeholder="admin@fashionai.com" autocomplete="username"/>
+          <div class="field-error" id="email-error">Please enter a valid email address.</div>
+        </div>
+
+        <div class="admin-field">
+          <label class="admin-label" for="admin-password">Password</label>
+          <div class="pw-wrap">
+            <input class="admin-input" type="password" id="admin-password" placeholder="••••••••••••" autocomplete="current-password"/>
+            <button class="pw-toggle" type="button" onclick="togglePw()" aria-label="Toggle password visibility">
+              <svg id="eye-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-error" id="pw-error">Password is required.</div>
+        </div>
+
+        <div class="login-options">
+          <label>
+            <input type="checkbox" id="remember-admin"/> Remember this device for 14 days
+          </label>
+          <a href="#" onclick="showForgotAdmin();return false;">Forgot password?</a>
+        </div>
+
+        <button class="admin-submit" id="login-btn" onclick="handleAdminLogin()">
+          Sign In to Admin
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <div class="security-badge">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--brown);flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>All admin sessions are encrypted and activity-logged. Unauthorised access attempts are reported.</span>
+        </div>
+      </div>
+
+      <!-- 2FA panel (shown after credentials) -->
+      <div id="twofa-panel" class="twofa-panel">
+        <span class="admin-form-label">Two-step verification</span>
+        <h2 class="admin-form-title" style="font-size:32px;">VERIFY<br/>YOUR IDENTITY</h2>
+        <p class="admin-form-sub">Enter the 6-digit code from your authenticator app or sent to <span id="twofa-email" style="color:var(--white);">admin@...</span></p>
+
+        <div class="twofa-digits">
+          <input class="twofa-digit" type="text" maxlength="1" id="d1" oninput="nextDigit(this,'d2')" onkeydown="prevDigit(event,null,'d1')"/>
+          <input class="twofa-digit" type="text" maxlength="1" id="d2" oninput="nextDigit(this,'d3')" onkeydown="prevDigit(event,'d1','d2')"/>
+          <input class="twofa-digit" type="text" maxlength="1" id="d3" oninput="nextDigit(this,'d4')" onkeydown="prevDigit(event,'d2','d3')"/>
+          <input class="twofa-digit" type="text" maxlength="1" id="d4" oninput="nextDigit(this,'d5')" onkeydown="prevDigit(event,'d3','d4')"/>
+          <input class="twofa-digit" type="text" maxlength="1" id="d5" oninput="nextDigit(this,'d6')" onkeydown="prevDigit(event,'d4','d5')"/>
+          <input class="twofa-digit" type="text" maxlength="1" id="d6" oninput="nextDigit(this,null)" onkeydown="prevDigit(event,'d5','d6')" onchange="checkComplete()"/>
+        </div>
+
+        <p style="font-size:12px;color:var(--stone);">
+          Didn't receive a code? <a href="#" style="color:var(--brown);text-decoration:underline;" onclick="resendCode();return false;">Resend code</a>
+          <span id="resend-timer" style="margin-left:4px;"></span>
+        </p>
+
+        <button class="admin-submit" id="verify-btn" onclick="handleVerify()">
+          Verify &amp; Sign In
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <p style="font-size:12px;color:var(--stone);margin-top:20px;">
+          <a href="#" style="color:var(--stone);text-decoration:underline;" onclick="document.getElementById('login-panel').style.display='block';document.getElementById('twofa-panel').classList.remove('visible');return false;">← Back to sign in</a>
+        </p>
+      </div>
+
+      <!-- Forgot password (admin) -->
+      <div id="forgot-admin-panel" style="display:none;">
+        <a href="#" class="back-link" style="margin-bottom:32px;" onclick="document.getElementById('forgot-admin-panel').style.display='none';document.getElementById('login-panel').style.display='block';return false;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back to sign in
+        </a>
+        <span class="admin-form-label">Password reset</span>
+        <h2 class="admin-form-title" style="font-size:32px;">RESET YOUR<br/>PASSWORD</h2>
+        <p class="admin-form-sub">Enter your admin email and we'll send a secure reset link to your inbox and a verification code to your registered phone.</p>
+        <div class="admin-field">
+          <label class="admin-label">Admin Email</label>
+          <input class="admin-input" type="email" id="forgot-email" placeholder="admin@fashionai.eg"/>
+        </div>
+        <button class="admin-submit" onclick="sendAdminReset()">
+          Send Reset Link
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <div id="reset-success" style="display:none;margin-top:20px;padding:16px;background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.2);font-size:12px;color:#27AE60;line-height:1.7;">
+          ✓ Reset link sent. Check your inbox and spam folder. The link expires in 15 minutes.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Cursor
+const cursor = document.createElement('div'); cursor.className = 'cursor';
+const trail = document.createElement('div'); trail.className = 'cursor-trail';
+document.body.prepend(trail); document.body.prepend(cursor);
+let mx = 0, my = 0, tx = 0, ty = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+function animateTrail() { tx += (mx-tx)*.12; ty += (my-ty)*.12; trail.style.left = tx+'px'; trail.style.top = ty+'px'; requestAnimationFrame(animateTrail); }
+animateTrail();
+document.addEventListener('mouseover', e => { if (e.target.closest('a,button,input')) cursor.classList.add('hovering'); });
+document.addEventListener('mouseout', e => { if (e.target.closest('a,button,input')) cursor.classList.remove('hovering'); });
+
+// Login handler
+async function handleAdminLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pw = document.getElementById('admin-password').value;
+  let valid = true;
+
+  document.getElementById('email-error').classList.remove('visible');
+  document.getElementById('pw-error').classList.remove('visible');
+  document.getElementById('admin-email').classList.remove('error');
+  document.getElementById('admin-password').classList.remove('error');
+  document.getElementById('auth-error').classList.remove('visible');
+
+  if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    document.getElementById('email-error').classList.add('visible');
+    document.getElementById('admin-email').classList.add('error');
+    valid = false;
+  }
+  if (!pw) {
+    document.getElementById('pw-error').classList.add('visible');
+    document.getElementById('admin-password').classList.add('error');
+    valid = false;
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin .8s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg> Verifying…';
+
+  try {
+    const res = await fetch('http://localhost:3001/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    if (data.user?.role !== 'admin') throw new Error('Admin access required. This account does not have admin privileges.');
+    localStorage.setItem('fashionai_token', data.token);
+    localStorage.setItem('fashionai_user', JSON.stringify(data.user));
+    window.location.href = 'index.html';
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In to Admin <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    const errEl = document.getElementById('auth-error');
+    errEl.textContent = e.message;
+    errEl.classList.add('visible');
+  }
+}
+
+function togglePw() {
+  const input = document.getElementById('admin-password');
+  const isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  document.getElementById('eye-icon').innerHTML = isText
+    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+}
+
+function showForgotAdmin() {
+  document.getElementById('login-panel').style.display = 'none';
+  document.getElementById('twofa-panel').classList.remove('visible');
+  document.getElementById('forgot-admin-panel').style.display = 'block';
+}
+
+function sendAdminReset() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return;
+  document.getElementById('reset-success').style.display = 'block';
+}
+
+// 2FA digit navigation
+function nextDigit(el, nextId) {
+  el.value = el.value.replace(/[^0-9]/g, '');
+  if (el.value.length === 1 && nextId) document.getElementById(nextId).focus();
+}
+function prevDigit(e, prevId, curId) {
+  if (e.key === 'Backspace' && !document.getElementById(curId).value && prevId) {
+    document.getElementById(prevId).focus();
+  }
+}
+function checkComplete() {
+  const code = ['d1','d2','d3','d4','d5','d6'].map(id => document.getElementById(id).value).join('');
+  if (code.length === 6) handleVerify();
+}
+function handleVerify() {
+  window.location.href = 'index.html';
+}
+
+let resendCountdown;
+function resendCode() {
+  let secs = 60;
+  const timerEl = document.getElementById('resend-timer');
+  timerEl.textContent = `(${secs}s)`;
+  clearInterval(resendCountdown);
+  resendCountdown = setInterval(() => {
+    secs--;
+    if (secs <= 0) { clearInterval(resendCountdown); timerEl.textContent = ''; }
+    else timerEl.textContent = `(${secs}s)`;
+  }, 1000);
+}
+
+// Enter key on login form
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-panel').style.display !== 'none') handleAdminLogin();
+});
+
+// CSS spin animation
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

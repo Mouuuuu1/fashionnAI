@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Catalog — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css"/>
+<style>
+.catalog-layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - var(--nav-h)); margin-top: var(--nav-h); }
+.catalog-sidebar { border-right: 1px solid var(--fog); background: var(--white); padding: 40px 0; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+.sidebar-inner { padding: 0 28px; }
+.catalog-content { background: var(--cream); }
+.catalog-toolbar { background: var(--white); border-bottom: 1px solid var(--fog); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+.active-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.toolbar-right { display: flex; align-items: center; gap: 16px; }
+.sort-select { border: 1px solid var(--fog); background: var(--white); padding: 8px 36px 8px 14px; font-family: 'Quicksand', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .1em; color: var(--ink); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A887E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; outline: none; cursor: none; transition: border-color .2s; }
+.sort-select:focus { border-color: var(--brown); }
+.view-toggle { display: flex; gap: 2px; }
+.view-btn { width: 36px; height: 36px; border: 1px solid var(--fog); background: none; color: var(--stone); display: flex; align-items: center; justify-content: center; transition: background .2s, color .2s; }
+.view-btn.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.result-count { font-size: 12px; color: var(--stone); font-weight: 500; }
+.products-catalog { padding: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+</style>
+</head>
+<body>
+<div class="catalog-layout">
+  <!-- Sidebar -->
+  <aside class="catalog-sidebar">
+    <div class="sidebar-inner">
+      <div style="margin-bottom:28px;">
+        <h2 style="font-family:'Anton',sans-serif;font-size:20px;letter-spacing:.04em;color:var(--ink);">FILTERS</h2>
+        <button style="font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);background:none;border:none;margin-top:6px;text-decoration:underline;">Clear All</button>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title">Category</div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> Women</label><span class="filter-count">1,240</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Men</label><span class="filter-count">980</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Kids</label><span class="filter-count">460</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Accessories</label><span class="filter-count">340</span></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title">Price (EGP)</div>
+        <div class="price-range">
+          <input type="number" placeholder="From" value="0" class="price-range"/>
+          <span style="color:var(--stone);font-size:12px;">—</span>
+          <input type="number" placeholder="To" value="10000" class="price-range"/>
+        </div>
+        <div style="font-size:10px;color:var(--stone);margin-top:8px;">EGP 0 — EGP 10,000</div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title">Size</div>
+        <div class="size-grid">
+          <button class="size-btn">XS</button><button class="size-btn active">S</button><button class="size-btn active">M</button><button class="size-btn">L</button><button class="size-btn">XL</button><button class="size-btn">XXL</button><button class="size-btn out">3XL</button>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title">Color</div>
+        <div class="color-swatches">
+          <div class="color-swatch active" style="background:#2E2E2E;" title="Black"></div>
+          <div class="color-swatch" style="background:#FAFAF8;border:1px solid var(--fog);" title="White"></div>
+          <div class="color-swatch" style="background:#6E6353;" title="Brown"></div>
+          <div class="color-swatch" style="background:#A2A092;" title="Taupe"></div>
+          <div class="color-swatch" style="background:#8B7355;" title="Camel"></div>
+          <div class="color-swatch" style="background:#C4A882;" title="Sand"></div>
+          <div class="color-swatch" style="background:#1A1A2E;" title="Navy"></div>
+          <div class="color-swatch" style="background:#2D5016;" title="Forest"></div>
+        </div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title">Brand</div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> Studio Collection</label><span class="filter-count">420</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Create Essentials</label><span class="filter-count">310</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Create Premium</label><span class="filter-count">180</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Capsule Line</label><span class="filter-count">95</span></div>
+      </div>
+      <div class="filter-section">
+        <div class="filter-title">Rating</div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> ★★★★★ only</label><span class="filter-count">218</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> ★★★★☆ & up</label><span class="filter-count">580</span></div>
+        <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> ★★★☆☆ & up</label><span class="filter-count">820</span></div>
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:8px;">Apply Filters</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="catalog-content">
+    <div class="catalog-toolbar">
+      <div class="active-filters">
+        <span style="font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-right:4px;">Active:</span>
+        <span class="filter-chip">Women <button>×</button></span>
+        <span class="filter-chip">S, M <button>×</button></span>
+        <span class="filter-chip">Studio Collection <button>×</button></span>
+      </div>
+      <div class="toolbar-right">
+        <span class="result-count" id="result-count">Loading…</span>
+        <select class="sort-select">
+          <option>Most Relevant</option><option>Price: Low to High</option><option>Price: High to Low</option><option>Newest</option><option>Best Rated</option><option>Best Selling</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="grid-view"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg></button>
+          <button class="view-btn" id="list-view"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="products-catalog" id="products-grid">
+      <div id="catalog-loading" style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--stone);font-size:13px;letter-spacing:.1em;text-transform:uppercase;">Loading products…</div>
+    </div>
+    <div class="pagination" id="pagination" style="padding-bottom:48px;"></div>
+  </div>
+</div>
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+// ── State ──
+const params = new URLSearchParams(location.search);
+let state = {
+  cat:  params.get('cat') || '',
+  q:    params.get('q')   || '',
+  sale: params.get('sale')|| '',
+  sort: 'newest',
+  page: 1,
+  limit: 12,
+  minPrice: '', maxPrice: '',
+  size: '', brand: '',
+};
+
+// ── Pre-check category filters from URL ──
+document.querySelectorAll('.filter-option input[type=checkbox]').forEach(cb => {
+  const label = cb.closest('label')?.textContent.trim().toLowerCase() || '';
+  cb.checked = state.cat ? label === state.cat : false;
+});
+
+// ── Render ──
+async function loadProducts() {
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--stone);font-size:13px;letter-spacing:.1em;text-transform:uppercase;">Loading…</div>';
+
+  const qs = new URLSearchParams();
+  if (state.cat)      qs.set('cat', state.cat);
+  if (state.q)        qs.set('q', state.q);
+  if (state.sale)     qs.set('sale', 1);
+  if (state.sort)     qs.set('sort', state.sort);
+  if (state.brand)    qs.set('brand', state.brand);
+  if (state.minPrice) qs.set('minPrice', state.minPrice);
+  if (state.maxPrice) qs.set('maxPrice', state.maxPrice);
+  if (state.size)     qs.set('size', state.size);
+  qs.set('page', state.page);
+  qs.set('limit', state.limit);
+
+  try {
+    const data = await FashionAPI.get('/products?' + qs);
+    document.getElementById('result-count').textContent = data.total + ' product' + (data.total !== 1 ? 's' : '');
+
+    if (data.products.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:80px 0;"><div style="font-family:Anton,sans-serif;font-size:28px;color:var(--ink);margin-bottom:12px;">No products found</div><p style="font-size:13px;color:var(--stone);">Try adjusting your filters.</p></div>';
+    } else {
+      grid.innerHTML = data.products.map(p => FashionAPI.productCardHTML(p)).join('');
+    }
+
+    renderPagination(data.page, data.pages);
+  } catch(e) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--danger);">Could not load products. Is the backend running?</div>';
+  }
+}
+
+function renderPagination(page, pages) {
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  let html = `<button class="page-btn arrow" onclick="changePage(${page-1})" ${page===1?'disabled':''}>‹</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && i > 2 && i < pages - 1 && Math.abs(i - page) > 1) {
+      if (i === 3 || i === pages - 2) html += '<span style="padding:0 8px;color:var(--stone);">…</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i===page?'active':''}" onclick="changePage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn arrow" onclick="changePage(${page+1})" ${page===pages?'disabled':''}>›</button>`;
+  el.innerHTML = html;
+}
+
+function changePage(p) {
+  state.page = p;
+  loadProducts();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Filters ──
+document.querySelectorAll('.filter-section').forEach(section => {
+  const title = section.querySelector('.filter-title')?.textContent.trim();
+
+  if (title === 'Category') {
+    section.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...section.querySelectorAll('input:checked')].map(c => c.closest('label').textContent.trim().toLowerCase());
+        state.cat = checked[0] || '';
+        state.page = 1; loadProducts();
+      });
+    });
+  }
+  if (title === 'Brand') {
+    section.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = [...section.querySelectorAll('input:checked')].map(c => c.closest('label').textContent.trim());
+        state.brand = checked[0] || '';
+        state.page = 1; loadProducts();
+      });
+    });
+  }
+  if (title === 'Size') {
+    section.querySelectorAll('.size-btn:not(.out)').forEach(b => {
+      b.addEventListener('click', () => {
+        section.querySelectorAll('.size-btn').forEach(x => x.classList.remove('active'));
+        const sel = state.size === b.textContent.trim();
+        state.size = sel ? '' : b.textContent.trim();
+        if (!sel) b.classList.add('active');
+        state.page = 1; loadProducts();
+      });
+    });
+  }
+  if (title === 'Color') {
+    section.querySelectorAll('.color-swatch').forEach(s => {
+      s.addEventListener('click', () => {
+        document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
+        s.classList.add('active');
+      });
+    });
+  }
+});
+
+// Price filter
+const priceInputs = document.querySelectorAll('.price-range input');
+let priceTimer;
+priceInputs.forEach(inp => {
+  inp.addEventListener('input', () => {
+    clearTimeout(priceTimer);
+    priceTimer = setTimeout(() => {
+      state.minPrice = priceInputs[0].value;
+      state.maxPrice = priceInputs[1].value;
+      state.page = 1; loadProducts();
+    }, 600);
+  });
+});
+
+// Sort
+document.querySelector('.sort-select')?.addEventListener('change', function() {
+  const map = { 'Most Relevant': 'newest', 'Price: Low to High': 'price-asc', 'Price: High to Low': 'price-desc', 'Newest': 'newest', 'Best Rated': 'rating', 'Best Selling': 'popular' };
+  state.sort = map[this.value] || 'newest';
+  state.page = 1; loadProducts();
+});
+
+// Apply Filters button
+document.querySelector('.btn-primary.btn-full')?.addEventListener('click', () => { state.page = 1; loadProducts(); });
+
+// Clear All
+document.querySelector('[style*="text-decoration:underline"]')?.addEventListener('click', () => {
+  state = { ...state, cat:'', q:'', sale:'', sort:'newest', page:1, minPrice:'', maxPrice:'', size:'', brand:'' };
+  document.querySelectorAll('.filter-section input[type=checkbox]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  loadProducts();
+});
+
+// View toggle
+document.getElementById('grid-view')?.addEventListener('click', () => {
+  document.getElementById('products-grid').style.gridTemplateColumns = 'repeat(3,1fr)';
+  document.getElementById('grid-view').classList.add('active');
+  document.getElementById('list-view').classList.remove('active');
+});
+document.getElementById('list-view')?.addEventListener('click', () => {
+  document.getElementById('products-grid').style.gridTemplateColumns = '1fr';
+  document.getElementById('list-view').classList.add('active');
+  document.getElementById('grid-view').classList.remove('active');
+});
+
+// Search query from nav
+if (state.q) document.getElementById('nav-search-input').value = state.q;
+
+loadProducts();
+</script>
+</body>
+</html>

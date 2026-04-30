@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Create Account — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.auth-layout { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); display: grid; grid-template-columns: 1fr 1fr; }
+.auth-visual { background: var(--ink); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 60px; }
+.auth-visual::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 30%, rgba(110,99,83,.25) 0%, transparent 60%); }
+.auth-visual-img { position: absolute; inset: 0; object-fit: cover; width: 100%; height: 100%; opacity: .3; }
+.auth-panel { background: var(--cream); display: flex; align-items: flex-start; justify-content: center; padding: 60px; overflow-y: auto; }
+.auth-form { width: 100%; max-width: 440px; padding: 20px 0; }
+.auth-title { font-family: 'Anton', sans-serif; font-size: 36px; letter-spacing: -.01em; color: var(--ink); margin-bottom: 8px; }
+.auth-sub { font-size: 13px; color: var(--stone); margin-bottom: 32px; line-height: 1.6; }
+.social-auth { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.social-btn-auth { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border: 1px solid var(--fog); background: var(--white); font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--ink); transition: border-color .2s, background .2s; }
+.social-btn-auth:hover { border-color: var(--brown); background: var(--white); }
+.auth-divider { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--fog); }
+.auth-divider span { font-size: 11px; color: var(--pebble); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.password-strength { height: 4px; background: var(--fog); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.strength-bar { height: 100%; border-radius: 2px; transition: width .3s, background .3s; width: 0; }
+.strength-label { font-size: 10px; margin-top: 4px; font-weight: 600; letter-spacing: .08em; }
+</style>
+</head>
+<body>
+<div class="auth-layout">
+  <!-- Visual -->
+  <div class="auth-visual">
+    <img src="https://placehold.co/800x1067/6e6353/d1d0cb?text=" alt="" class="auth-visual-img"/>
+    <div style="position:relative;z-index:1;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--brown);margin-bottom:20px;">Join FashionAI</div>
+      <h2 style="font-family:'Anton',sans-serif;font-size:44px;line-height:1;letter-spacing:-.02em;color:var(--white);margin-bottom:20px;">YOUR STYLE.<br/>YOUR AI.<br/>YOUR WAY.</h2>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:36px;height:36px;background:rgba(110,99,83,.2);border:1px solid rgba(110,99,83,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" fill="none" stroke="var(--brown)" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size:13px;color:var(--pebble);line-height:1.5;">Free AI Virtual Try-On on every product</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:36px;height:36px;background:rgba(110,99,83,.2);border:1px solid rgba(110,99,83,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" fill="none" stroke="var(--brown)" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size:13px;color:var(--pebble);line-height:1.5;">Exclusive member-only sale alerts</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:36px;height:36px;background:rgba(110,99,83,.2);border:1px solid rgba(110,99,83,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" fill="none" stroke="var(--brown)" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size:13px;color:var(--pebble);line-height:1.5;">Save outfits and track your wardrobe</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:36px;height:36px;background:rgba(110,99,83,.2);border:1px solid rgba(110,99,83,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" fill="none" stroke="var(--brown)" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size:13px;color:var(--pebble);line-height:1.5;">Fast checkout with saved addresses &amp; cards</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="auth-panel">
+    <div class="auth-form">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--brown);margin-bottom:12px;">It's free</div>
+      <h1 class="auth-title">CREATE ACCOUNT</h1>
+      <p class="auth-sub">Already have an account? <a href="login.html" style="color:var(--brown);text-decoration:underline;">Sign in here</a></p>
+
+      <!-- Social -->
+      <div class="social-auth">
+        <button class="social-btn-auth" onclick="alert('Google OAuth — demo only')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign up with Google
+        </button>
+        <button class="social-btn-auth" onclick="alert('Facebook OAuth — demo only')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Sign up with Facebook
+        </button>
+      </div>
+
+      <div class="auth-divider"><span>or register with email</span></div>
+
+      <!-- Fields -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Sara" id="fname"/></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Ahmed" id="lname"/></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" type="email" placeholder="sara@example.com" id="email" oninput="validateEmail(this)"/>
+          <div id="email-error" style="font-size:11px;color:var(--danger);margin-top:4px;display:none;">Please enter a valid email address.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" type="tel" placeholder="+20 1XX XXX XXXX"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" placeholder="Create a strong password" id="password" oninput="checkStrength(this.value)"/>
+          <div class="password-strength"><div class="strength-bar" id="strength-bar"></div></div>
+          <div class="strength-label" id="strength-label" style="color:var(--pebble);"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input class="form-input" type="password" placeholder="Re-enter your password" id="confirm-password"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gender <span style="font-size:10px;color:var(--pebble);font-weight:400;text-transform:none;letter-spacing:0;">(optional, for personalized recommendations)</span></label>
+          <select class="form-select">
+            <option value="">Prefer not to say</option>
+            <option>Female</option>
+            <option>Male</option>
+            <option>Non-binary</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="checkbox-group">
+            <input type="checkbox" id="terms" />
+            <label class="checkbox-label" for="terms">I agree to the <a href="terms.html" style="color:var(--brown);text-decoration:underline;">Terms of Service</a> and <a href="privacy-policy.html" style="color:var(--brown);text-decoration:underline;">Privacy Policy</a></label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="newsletter" checked />
+            <label class="checkbox-label" for="newsletter">Send me exclusive offers, new arrivals, and style inspiration</label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full" style="justify-content:center;margin-top:28px;padding:18px;font-size:13px;" onclick="handleRegister()">
+        Create Account
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+
+      <div style="text-align:center;margin-top:24px;font-size:13px;color:var(--stone);">
+        Already have an account? <a href="login.html" style="color:var(--brown);text-decoration:underline;">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="components.js"></script>
+<script>
+function checkStrength(pw) {
+  const bar = document.getElementById('strength-bar');
+  const label = document.getElementById('strength-label');
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [
+    { w: '0%', color: 'transparent', text: '' },
+    { w: '25%', color: 'var(--danger)', text: 'Weak' },
+    { w: '50%', color: '#f39c12', text: 'Fair' },
+    { w: '75%', color: 'var(--success)', text: 'Good' },
+    { w: '100%', color: 'var(--success)', text: 'Strong' },
+  ];
+  bar.style.width = levels[score].w;
+  bar.style.background = levels[score].color;
+  label.textContent = levels[score].text;
+  label.style.color = levels[score].color;
+}
+function validateEmail(input) {
+  const err = document.getElementById('email-error');
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+  err.style.display = input.value && !valid ? 'block' : 'none';
+}
+const API = 'http://localhost:3001/api';
+async function handleRegister() {
+  const terms = document.getElementById('terms');
+  if (!terms.checked) { window.fashionAI && window.fashionAI.toast('Please agree to the Terms of Service to continue.', 'error'); return; }
+  const pw  = document.getElementById('password').value;
+  const cpw = document.getElementById('confirm-password').value;
+  if (pw !== cpw) { window.fashionAI && window.fashionAI.toast('Passwords do not match.', 'error'); return; }
+  if (pw.length < 6) { window.fashionAI && window.fashionAI.toast('Password must be at least 6 characters.', 'error'); return; }
+
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.querySelector('input[type="tel"]').value.trim();
+  if (!fname || !lname || !email) { window.fashionAI && window.fashionAI.toast('Please fill in all required fields.', 'error'); return; }
+
+  const btn = document.querySelector('.btn-primary');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+
+  try {
+    const res  = await fetch(`${API}/auth/register`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ name: `${fname} ${lname}`, email, password: pw, phone: phone || undefined }) });
+    const data = await res.json();
+    if (!res.ok) { window.fashionAI && window.fashionAI.toast(data.error || 'Registration failed', 'error'); return; }
+    localStorage.setItem('fashionai_token', data.token);
+    localStorage.setItem('fashionai_user',  JSON.stringify(data.user));
+    window.fashionAI && window.fashionAI.toast('Account created! Welcome, ' + data.user.name.split(' ')[0] + '!', 'success');
+    setTimeout(() => location.href = 'index.html', 900);
+  } catch {
+    window.fashionAI && window.fashionAI.toast('Could not reach the server — is the backend running?', 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Create Account <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+}
+</script>
+</body>
+</html>

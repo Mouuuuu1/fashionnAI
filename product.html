@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Oversized Linen Blazer — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.pdp-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); }
+.pdp-gallery { background: var(--cream); position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); display: grid; grid-template-columns: 80px 1fr; gap: 2px; }
+.gallery-thumbs { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; background: var(--fog); }
+.gallery-thumb { aspect-ratio: 3/4; overflow: hidden; cursor: none; opacity: .5; transition: opacity .2s; flex-shrink: 0; }
+.gallery-thumb.active { opacity: 1; }
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-main { position: relative; overflow: hidden; background: var(--cream); }
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s cubic-bezier(.23,1,.32,1); }
+.gallery-main:hover img { transform: scale(1.02); }
+.gallery-zoom-hint { position: absolute; bottom: 20px; right: 20px; background: rgba(46,46,46,.7); backdrop-filter: blur(6px); color: var(--fog); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; padding: 8px 14px; }
+.pdp-info { padding: 60px 56px; overflow-y: auto; }
+.pdp-brand { font-size: 10px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--brown); margin-bottom: 12px; }
+.pdp-name { font-family: 'Anton', sans-serif; font-size: 40px; line-height: 1; letter-spacing: -.01em; color: var(--ink); margin-bottom: 16px; }
+.pdp-rating-row { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--fog); }
+.pdp-price { font-family: 'Anton', sans-serif; font-size: 32px; letter-spacing: .02em; color: var(--ink); margin-bottom: 4px; }
+.pdp-price-old { font-size: 14px; color: var(--pebble); text-decoration: line-through; }
+.pdp-section-label { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); margin-bottom: 12px; }
+.pdp-section { margin-bottom: 28px; }
+.pdp-size-guide { font-size: 11px; color: var(--brown); letter-spacing: .1em; text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; font-family: 'Quicksand', sans-serif; }
+.qty-control { display: flex; align-items: center; border: 1px solid var(--fog); height: 44px; }
+.qty-btn { width: 44px; height: 100%; display: flex; align-items: center; justify-content: center; background: none; border: none; font-size: 18px; color: var(--stone); transition: color .2s, background .2s; }
+.qty-btn:hover { color: var(--ink); background: var(--cream); }
+.qty-val { width: 44px; text-align: center; font-size: 14px; font-weight: 700; color: var(--ink); border-left: 1px solid var(--fog); border-right: 1px solid var(--fog); height: 100%; display: flex; align-items: center; justify-content: center; }
+.sticky-buy { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--fog); padding: 16px 40px; display: flex; align-items: center; gap: 20px; z-index: 100; transform: translateY(100%); transition: transform .3s cubic-bezier(.23,1,.32,1); box-shadow: 0 -8px 32px rgba(46,46,46,.08); }
+.sticky-buy.visible { transform: translateY(0); }
+.sticky-buy-img { width: 48px; height: 64px; object-fit: cover; flex-shrink: 0; }
+.sticky-buy-info { flex: 1; }
+.model-note { font-size: 11px; color: var(--pebble); margin-top: 8px; line-height: 1.5; }
+.review-modal { display: none; position: fixed; inset: 0; background: rgba(46,46,46,.6); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+.review-modal.open { display: flex; }
+.review-modal-box { background: var(--white); width: 560px; max-width: 95vw; padding: 48px; position: relative; max-height: 90vh; overflow-y: auto; }
+.stock-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-top: 8px; }
+.stock-indicator.low { color: var(--danger); }
+.stock-indicator.in  { color: var(--success); }
+.stock-indicator::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pdp-cta { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 32px; }
+.tryon-cta { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border: 1px solid var(--fog); background: transparent; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); transition: border-color .2s, background .2s; }
+.tryon-cta:hover { border-color: var(--brown); background: rgba(110,99,83,.05); }
+.tryon-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--brown); animation: pulse-dot 2s infinite; }
+.pdp-accordion { border-top: 1px solid var(--fog); }
+.accordion-item { border-bottom: 1px solid var(--fog); }
+.accordion-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; cursor: none; }
+.accordion-body { display: none; padding: 0 0 20px; font-size: 13px; line-height: 1.75; color: var(--stone); }
+.accordion-body.open { display: block; }
+.accordion-icon { transition: transform .3s; }
+.accordion-item.open .accordion-icon { transform: rotate(45deg); }
+.related-section { background: var(--cream); padding: 80px 60px; border-top: 1px solid var(--fog); }
+.related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-top: 40px; }
+.review-list { display: flex; flex-direction: column; gap: 0; }
+.review-item { padding: 32px 0; border-bottom: 1px solid var(--fog); }
+.review-item:last-child { border-bottom: none; }
+.review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.review-headline { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.review-body { font-size: 13px; line-height: 1.7; color: var(--stone); }
+.review-helpful { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 11px; color: var(--stone); }
+.helpful-btn { border: 1px solid var(--fog); background: none; padding: 5px 12px; font-size: 10px; font-weight: 600; letter-spacing: .1em; color: var(--stone); transition: border-color .2s, color .2s; }
+.helpful-btn:hover { border-color: var(--ink); color: var(--ink); }
+</style>
+</head>
+<body>
+<div style="padding-top:0;">
+  <div class="pdp-layout">
+    <!-- Gallery -->
+    <div class="pdp-gallery">
+      <div class="gallery-thumbs">
+        <div class="gallery-thumb active"><img src="https://placehold.co/160x213/d1d0cb/6e6353?text=01" alt=""/></div>
+        <div class="gallery-thumb"><img src="https://placehold.co/160x213/a2a092/2e2e2e?text=02" alt=""/></div>
+        <div class="gallery-thumb"><img src="https://placehold.co/160x213/8a887e/fafaf8?text=03" alt=""/></div>
+        <div class="gallery-thumb"><img src="https://placehold.co/160x213/6e6353/d1d0cb?text=04" alt=""/></div>
+      </div>
+      <div class="gallery-main">
+        <img src="https://placehold.co/800x1067/d1d0cb/6e6353?text=BLAZER" alt="Blazer" id="main-img"/>
+        <div class="gallery-zoom-hint">Hover to zoom</div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="pdp-info">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb" style="margin-bottom:28px;">
+        <a href="index.html">Home</a><span>›</span>
+        <a href="catalog.html?cat=women">Women</a><span>›</span>
+        <a href="catalog.html">Blazers</a><span>›</span>
+        <span style="color:var(--ink);">Oversized Linen Blazer</span>
+      </div>
+
+      <div class="pdp-brand">Studio Collection</div>
+      <h1 class="pdp-name">Oversized Linen Blazer</h1>
+
+      <div class="pdp-rating-row">
+        <span class="stars" style="font-size:16px;">★★★★★</span>
+        <span style="font-size:13px;font-weight:600;color:var(--ink);">4.9</span>
+        <a href="#reviews" style="font-size:12px;color:var(--stone);text-decoration:underline;">42 reviews</a>
+        <span style="color:var(--fog);">|</span>
+        <span style="font-size:12px;color:var(--success);font-weight:600;">In Stock</span>
+      </div>
+
+      <div class="pdp-price"><span class="egp">EGP</span>2,490</div>
+
+      <!-- Colors -->
+      <div class="pdp-section" style="margin-top:24px;">
+        <div class="pdp-section-label">Color: <span style="color:var(--ink);font-weight:700;text-transform:none;letter-spacing:0;">Stone Beige</span></div>
+        <div class="color-swatches">
+          <div class="color-swatch active" style="background:#d1d0cb;" title="Stone Beige"></div>
+          <div class="color-swatch" style="background:#2e2e2e;" title="Midnight Black"></div>
+          <div class="color-swatch" style="background:#6e6353;" title="Warm Brown"></div>
+        </div>
+      </div>
+
+      <!-- Size -->
+      <div class="pdp-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="pdp-section-label" style="margin-bottom:0;">Size</div>
+          <a href="size-guide.html" class="pdp-size-guide">Size Guide →</a>
+        </div>
+        <div class="size-grid">
+          <button class="size-btn out">XS</button>
+          <button class="size-btn">S</button>
+          <button class="size-btn active">M</button>
+          <button class="size-btn">L</button>
+          <button class="size-btn">XL</button>
+        </div>
+        <div class="stock-indicator low" style="margin-top:12px;">Only 3 left in size M</div>
+        <div class="model-note">Model is 175cm and wearing size M. This style runs true to size.</div>
+      </div>
+
+      <!-- Quantity -->
+      <div class="pdp-section" style="margin-bottom:16px;">
+        <div class="pdp-section-label">Quantity</div>
+        <div class="qty-control" style="width:fit-content;">
+          <button class="qty-btn" onclick="changeQty(-1)">−</button>
+          <div class="qty-val" id="qty-val">1</div>
+          <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="pdp-cta" id="pdp-cta">
+        <a href="cart.html" class="btn btn-primary btn-full" style="justify-content:center;gap:10px;font-size:12px;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Add to Cart
+        </a>
+        <button class="wishlist-btn" style="position:static;width:56px;height:56px;background:var(--cream);border:1px solid var(--fog);display:flex;align-items:center;justify-content:center;transition:border-color .2s;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div>
+
+      <!-- Try-On CTA -->
+      <a href="try-on.html" class="tryon-cta" style="display:flex;width:100%;margin-top:12px;text-decoration:none;">
+        <div class="tryon-pulse"></div>
+        AI Virtual Try-On — Free
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left:auto;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+
+      <!-- Trust badges -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px;padding:20px;background:var(--cream);">
+        <div style="text-align:center;"><div style="font-size:18px;margin-bottom:6px;">🚚</div><div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);">Free Delivery<br/>Over EGP 500</div></div>
+        <div style="text-align:center;"><div style="font-size:18px;margin-bottom:6px;">↩</div><div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);">Free Returns<br/>14 Days</div></div>
+        <div style="text-align:center;"><div style="font-size:18px;margin-bottom:6px;">🔒</div><div style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);">Secure Payment<br/>100%</div></div>
+      </div>
+
+      <!-- Accordion -->
+      <div class="pdp-accordion" style="margin-top:32px;">
+        <div class="accordion-item open">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+            Description <span class="accordion-icon" style="font-size:20px;">+</span>
+          </div>
+          <div class="accordion-body open">
+            An oversized blazer crafted from premium-quality linen. A relaxed contemporary cut with a soft inner lining — effortlessly versatile for any outfit. Perfect for transitional seasons and professional environments.
+            <ul style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+              <li>100% natural linen</li>
+              <li>Viscose lining</li>
+              <li>Oversized cut fitting sizes S–L</li>
+              <li>Hidden side pockets</li>
+              <li>Single centre button</li>
+            </ul>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+            Care Instructions <span class="accordion-icon" style="font-size:20px;">+</span>
+          </div>
+          <div class="accordion-body">Cold machine wash. Do not iron directly. Lay flat to dry. Dry cleaning recommended.</div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
+            Shipping & Returns <span class="accordion-icon" style="font-size:20px;">+</span>
+          </div>
+          <div class="accordion-body">Free delivery on orders over EGP 500. Arrives within 3–5 business days. Free returns within 14 days of receipt.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <section class="section" id="reviews" style="background:var(--white);border-top:1px solid var(--fog);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;">
+      <div>
+        <div class="section-label">Customer Feedback</div>
+        <h2 class="section-title" style="margin-bottom:0;">CUSTOMER<br /><span class="muted">REVIEWS</span></h2>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Anton',sans-serif;font-size:64px;line-height:1;letter-spacing:-.02em;color:var(--ink);">4.9</div>
+        <div class="stars" style="font-size:18px;">★★★★★</div>
+        <div style="font-size:12px;color:var(--stone);margin-top:4px;">42 reviews</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:60px;">
+      <!-- Rating bars -->
+      <div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:12px;width:16px;color:var(--stone);">5</span>
+            <div style="flex:1;height:4px;background:var(--fog);border-radius:2px;overflow:hidden;"><div style="height:100%;width:78%;background:var(--brown);border-radius:2px;"></div></div>
+            <span style="font-size:12px;color:var(--stone);">78%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:12px;width:16px;color:var(--stone);">4</span>
+            <div style="flex:1;height:4px;background:var(--fog);border-radius:2px;overflow:hidden;"><div style="height:100%;width:15%;background:var(--brown);border-radius:2px;opacity:.7;"></div></div>
+            <span style="font-size:12px;color:var(--stone);">15%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:12px;width:16px;color:var(--stone);">3</span>
+            <div style="flex:1;height:4px;background:var(--fog);border-radius:2px;overflow:hidden;"><div style="height:100%;width:5%;background:var(--brown);border-radius:2px;opacity:.5;"></div></div>
+            <span style="font-size:12px;color:var(--stone);">5%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:12px;width:16px;color:var(--stone);">2</span>
+            <div style="flex:1;height:4px;background:var(--fog);border-radius:2px;overflow:hidden;"><div style="height:100%;width:2%;background:var(--brown);border-radius:2px;opacity:.4;"></div></div>
+            <span style="font-size:12px;color:var(--stone);">2%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:12px;width:16px;color:var(--stone);">1</span>
+            <div style="flex:1;height:4px;background:var(--fog);border-radius:2px;overflow:hidden;"><div style="height:100%;width:0%;background:var(--brown);border-radius:2px;"></div></div>
+            <span style="font-size:12px;color:var(--stone);">0%</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:32px;width:100%;justify-content:center;" onclick="openReview()">Write a Review</button>
+      </div>
+      <!-- Reviews list -->
+      <div class="review-list">
+        <div class="review-item">
+          <div class="review-header">
+            <div><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Sara M. <span style="font-size:10px;background:var(--brown);color:var(--white);padding:2px 8px;margin-left:6px;">Verified Buyer</span></div><div class="stars">★★★★★</div></div>
+            <div style="font-size:11px;color:var(--stone);">12 April 2025</div>
+          </div>
+          <div class="review-headline">Amazing blazer — exceptional quality</div>
+          <div class="review-body">I ordered size M and it fits beautifully. The linen is soft and lightweight. I tried the virtual try-on before purchasing and it was exactly as shown. Highly recommend.</div>
+          <div class="review-helpful">Helpful? <button class="helpful-btn">Yes (18)</button> <button class="helpful-btn">No (2)</button></div>
+        </div>
+        <div class="review-item">
+          <div class="review-header">
+            <div><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Ahmed A. <span style="font-size:10px;background:var(--brown);color:var(--white);padding:2px 8px;margin-left:6px;">Verified Buyer</span></div><div class="stars">★★★★★</div></div>
+            <div style="font-size:11px;color:var(--stone);">8 March 2025</div>
+          </div>
+          <div class="review-headline">Exceeded my expectations</div>
+          <div class="review-body">Arrived on time in beautiful packaging. The stitching quality is excellent. I bought it on impulse after the AI try-on and I have no regrets at all.</div>
+          <div class="review-helpful">Helpful? <button class="helpful-btn">Yes (11)</button> <button class="helpful-btn">No (0)</button></div>
+        </div>
+        <!-- Hidden extra reviews -->
+        <div class="review-item" style="display:none;" data-extra>
+          <div class="review-header">
+            <div><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Nour K. <span style="font-size:10px;background:var(--brown);color:var(--white);padding:2px 8px;margin-left:6px;">Verified Buyer</span></div><div class="stars">★★★★★</div></div>
+            <div style="font-size:11px;color:var(--stone);">22 Feb 2025</div>
+          </div>
+          <div class="review-headline">Perfect for work and weekends</div>
+          <div class="review-body">I've been wearing this blazer non-stop since it arrived. The oversized fit is elegant, not sloppy. I wore it to a client meeting and got three compliments. Worth every pound.</div>
+          <div class="review-helpful">Helpful? <button class="helpful-btn">Yes (7)</button> <button class="helpful-btn">No (1)</button></div>
+        </div>
+        <div class="review-item" style="display:none;" data-extra>
+          <div class="review-header">
+            <div><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">Dina H. <span style="font-size:10px;background:var(--stone);color:var(--white);padding:2px 8px;margin-left:6px;">Buyer</span></div><div class="stars">★★★★☆</div></div>
+            <div style="font-size:11px;color:var(--stone);">5 Jan 2025</div>
+          </div>
+          <div class="review-headline">Great quality, slightly warm for summer</div>
+          <div class="review-body">The construction and fabric are excellent. I'd say it's better suited for spring/autumn than peak summer. Still keeping it — will rotate it back in September.</div>
+          <div class="review-helpful">Helpful? <button class="helpful-btn">Yes (4)</button> <button class="helpful-btn">No (0)</button></div>
+        </div>
+        <div style="margin-top:32px;text-align:center;" id="load-more-wrap">
+          <button class="btn btn-ghost" onclick="loadMoreReviews()" style="gap:8px;">Load More Reviews <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Write a Review Modal -->
+  <div class="review-modal" id="review-modal" onclick="if(event.target===this)closeReview()">
+    <div class="review-modal-box">
+      <button onclick="closeReview()" style="position:absolute;top:20px;right:20px;background:none;border:none;font-size:22px;color:var(--stone);cursor:pointer;">×</button>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--brown);margin-bottom:12px;">Share Your Experience</div>
+      <h3 style="font-family:'Anton',sans-serif;font-size:28px;color:var(--ink);margin-bottom:28px;">WRITE A REVIEW</h3>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="form-group">
+          <label class="form-label">Your Rating</label>
+          <div style="display:flex;gap:6px;" id="star-picker">
+            <span data-star="1" onclick="setRating(1)" style="font-size:28px;color:var(--fog);cursor:pointer;">★</span>
+            <span data-star="2" onclick="setRating(2)" style="font-size:28px;color:var(--fog);cursor:pointer;">★</span>
+            <span data-star="3" onclick="setRating(3)" style="font-size:28px;color:var(--fog);cursor:pointer;">★</span>
+            <span data-star="4" onclick="setRating(4)" style="font-size:28px;color:var(--fog);cursor:pointer;">★</span>
+            <span data-star="5" onclick="setRating(5)" style="font-size:28px;color:var(--fog);cursor:pointer;">★</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Headline</label>
+          <input class="form-input" type="text" placeholder="Sum up your experience in a line" id="review-headline-input"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Review</label>
+          <textarea class="form-input" rows="4" placeholder="What did you think of the fit, quality, and style?" id="review-body-input" style="resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Size Purchased</label>
+          <select class="form-input" style="appearance:auto;">
+            <option>XS</option><option selected>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-full" style="justify-content:center;margin-top:8px;" onclick="submitReview()">Submit Review</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <div class="related-section">
+    <div class="section-label reveal">You Might Also Like</div>
+    <h2 class="section-title reveal">COMPLETE <span class="muted">THE LOOK</span></h2>
+    <div class="related-grid reveal">
+      <div class="product-card"><div class="product-img"><img src="https://placehold.co/400x533/a2a092/2e2e2e?text=Dress" alt=""/><div class="product-overlay"><a href="cart.html" class="overlay-btn">Add to Cart</a></div><button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div><a href="product.html" class="product-info" style="display:block;"><div class="product-brand">Create Essentials</div><div class="product-name">Minimal Midi Slip Dress</div><div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>1,290</span></div><div class="product-rating"><span class="stars">★★★★☆</span><span class="rating-count">(87)</span></div></a></div>
+      <div class="product-card"><div class="product-img"><img src="https://placehold.co/400x533/8a887e/fafaf8?text=Trousers" alt=""/><div class="product-overlay"><a href="cart.html" class="overlay-btn">Add to Cart</a></div><button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div><a href="product.html" class="product-info" style="display:block;"><div class="product-brand">Studio Collection</div><div class="product-name">Wide-Leg Tailored Trousers</div><div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>1,890</span></div><div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(29)</span></div></a></div>
+      <div class="product-card"><div class="product-img"><img src="https://placehold.co/400x533/6e6353/f4f3ef?text=Bag" alt=""/><div class="product-overlay"><a href="cart.html" class="overlay-btn">Add to Cart</a></div><button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div><a href="product.html" class="product-info" style="display:block;"><div class="product-brand">Accessories</div><div class="product-name">Structured Leather Tote</div><div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>1,490</span></div><div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(33)</span></div></a></div>
+      <div class="product-card"><div class="product-img"><img src="https://placehold.co/400x533/d1d0cb/6e6353?text=Cami" alt=""/><div class="product-overlay"><a href="cart.html" class="overlay-btn">Add to Cart</a></div><button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></div><a href="product.html" class="product-info" style="display:block;"><div class="product-brand">Create Premium</div><div class="product-name">Silk Blend Camisole</div><div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>890</span></div><div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(55)</span></div></a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sticky Buy Bar -->
+<div class="sticky-buy" id="sticky-buy">
+  <img src="https://placehold.co/48x64/d1d0cb/6e6353?text=" alt="" class="sticky-buy-img"/>
+  <div class="sticky-buy-info">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--stone);">Studio Collection</div>
+    <div style="font-size:14px;font-weight:700;color:var(--ink);">Oversized Linen Blazer</div>
+    <div style="font-size:12px;color:var(--stone);margin-top:2px;">Size: <strong id="sticky-size">M</strong> · Color: <strong id="sticky-color">Stone Beige</strong></div>
+  </div>
+  <div style="font-family:'Anton',sans-serif;font-size:22px;color:var(--ink);">EGP 2,490</div>
+  <a href="cart.html" class="btn btn-primary" style="gap:8px;white-space:nowrap;">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    Add to Cart
+  </a>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const productId = params.get('id');
+if (!productId) location.href = 'catalog.html';
+
+let product = null;
+let selectedSize = null;
+let selectedColor = null;
+let qty = 1;
+
+async function loadProduct() {
+  try {
+    product = await FashionAPI.get('/products/' + productId);
+    renderProduct();
+    loadRelated();
+  } catch(e) {
+    document.querySelector('.pdp-layout').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:100px;color:var(--danger);font-size:16px;">Product not found. <a href="catalog.html" style="text-decoration:underline;">Browse catalog</a></div>';
+  }
+}
+
+function renderProduct() {
+  const p = product;
+  document.title = p.name + ' — FashionAI';
+  const imgs = (Array.isArray(p.images) && p.images.length > 0) ? p.images :
+    [p.image || `https://placehold.co/800x1067/d1d0cb/6e6353?text=${encodeURIComponent(p.name)}`];
+  const mainPrice = p.sale_price ?? p.price;
+  const inStock = p.stock > 0;
+
+  // Gallery
+  const thumbsEl = document.querySelector('.gallery-thumbs');
+  const mainImgEl = document.getElementById('main-img');
+  thumbsEl.innerHTML = imgs.map((img, i) =>
+    `<div class="gallery-thumb ${i===0?'active':''}" data-img="${img}"><img src="${img}" alt="${p.name}"/></div>`
+  ).join('');
+  mainImgEl.src = imgs[0]; mainImgEl.alt = p.name;
+  thumbsEl.querySelectorAll('.gallery-thumb').forEach(t => {
+    t.addEventListener('click', () => {
+      thumbsEl.querySelectorAll('.gallery-thumb').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      mainImgEl.src = t.dataset.img;
+    });
+  });
+  const stickyImg = document.querySelector('.sticky-buy-img');
+  if (stickyImg) stickyImg.src = imgs[0];
+
+  // Breadcrumb
+  const bc = document.querySelector('.breadcrumb');
+  if (bc) bc.innerHTML = `<a href="index.html">Home</a><span>›</span><a href="catalog.html?cat=${encodeURIComponent(p.category)}">${p.category}</a><span>›</span><span style="color:var(--ink);">${p.name}</span>`;
+
+  // Brand & name
+  document.querySelector('.pdp-brand').textContent = p.brand;
+  document.querySelector('.pdp-name').textContent = p.name;
+  const stickyInfo = document.querySelectorAll('.sticky-buy-info div');
+  if (stickyInfo[0]) stickyInfo[0].textContent = p.brand;
+  if (stickyInfo[1]) stickyInfo[1].textContent = p.name;
+
+  // Rating row
+  document.querySelector('.pdp-rating-row').innerHTML = `
+    <span class="stars" style="font-size:16px;">${FashionAPI.stars(p.rating)}</span>
+    <span style="font-size:13px;font-weight:600;color:var(--ink);">${(p.rating||0).toFixed(1)}</span>
+    <a href="#reviews" style="font-size:12px;color:var(--stone);text-decoration:underline;">${p.reviews_count||0} reviews</a>
+    <span style="color:var(--fog);">|</span>
+    <span style="font-size:12px;${inStock?'color:var(--success)':'color:var(--danger)'};font-weight:600;">${inStock?'In Stock':'Out of Stock'}</span>`;
+
+  // Price
+  document.querySelector('.pdp-price').innerHTML = `<span class="egp">EGP</span>${Number(mainPrice).toLocaleString()}`;
+  const priceOldEl = document.querySelector('.pdp-price-old');
+  if (priceOldEl) { priceOldEl.textContent = p.sale_price ? `EGP ${Number(p.price).toLocaleString()}` : ''; priceOldEl.style.display = p.sale_price ? '' : 'none'; }
+  const stickyPriceEl = document.querySelector('.sticky-buy [style*="Anton"]');
+  if (stickyPriceEl) stickyPriceEl.textContent = `EGP ${Number(mainPrice).toLocaleString()}`;
+
+  // Colors
+  const colors = Array.isArray(p.colors) ? p.colors : [];
+  selectedColor = colors[0] || null;
+  const colorSwatches = document.querySelector('.color-swatches');
+  if (colorSwatches) {
+    colorSwatches.innerHTML = colors.map((c, i) =>
+      `<div class="color-swatch ${i===0?'active':''}" title="${c}" data-color="${c}" style="background:var(--fog);border:${i===0?'2px solid var(--brown)':'1px solid var(--fog)'}"></div>`
+    ).join('');
+    const colorLabel = colorSwatches.closest('.pdp-section')?.querySelector('.pdp-section-label span');
+    if (colorLabel && colors[0]) colorLabel.textContent = colors[0];
+    colorSwatches.querySelectorAll('.color-swatch').forEach(s => {
+      s.addEventListener('click', () => {
+        colorSwatches.querySelectorAll('.color-swatch').forEach(x => { x.classList.remove('active'); x.style.border = '1px solid var(--fog)'; });
+        s.classList.add('active'); s.style.border = '2px solid var(--brown)';
+        selectedColor = s.dataset.color;
+        if (colorLabel) colorLabel.textContent = s.dataset.color;
+        const sc = document.getElementById('sticky-color'); if (sc) sc.textContent = s.dataset.color;
+      });
+    });
+    const sc = document.getElementById('sticky-color'); if (sc && colors[0]) sc.textContent = colors[0];
+  }
+
+  // Sizes
+  const sizes = Array.isArray(p.sizes) ? p.sizes : [];
+  selectedSize = sizes[0] || null;
+  const sizeGrid = document.querySelector('.size-grid');
+  if (sizeGrid) {
+    sizeGrid.innerHTML = sizes.map((s, i) =>
+      `<button class="size-btn ${i===0?'active':''}" data-size="${s}">${s}</button>`
+    ).join('');
+    sizeGrid.querySelectorAll('.size-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        sizeGrid.querySelectorAll('.size-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active'); selectedSize = b.dataset.size;
+        const ss = document.getElementById('sticky-size'); if (ss) ss.textContent = b.dataset.size;
+      });
+    });
+    const ss = document.getElementById('sticky-size'); if (ss && sizes[0]) ss.textContent = sizes[0];
+  }
+
+  // Stock
+  const stockEl = document.querySelector('.stock-indicator');
+  if (stockEl) {
+    if (p.stock === 0) { stockEl.className = 'stock-indicator low'; stockEl.textContent = 'Out of Stock'; }
+    else if (p.stock < 5) { stockEl.className = 'stock-indicator low'; stockEl.textContent = `Only ${p.stock} left`; }
+    else { stockEl.className = 'stock-indicator in'; stockEl.textContent = 'In Stock'; }
+  }
+  document.querySelector('.model-note')?.remove();
+
+  // Description
+  const descBody = document.querySelector('.accordion-item.open .accordion-body');
+  if (descBody && p.description) descBody.textContent = p.description;
+
+  // CTA wiring
+  const ctaArea = document.getElementById('pdp-cta');
+  if (ctaArea) {
+    const addBtn = ctaArea.querySelector('.btn-primary');
+    if (inStock) { addBtn.removeAttribute('href'); addBtn.onclick = addToCart; }
+    else { addBtn.textContent = 'Out of Stock'; addBtn.disabled = true; }
+    const wishBtn = ctaArea.querySelector('.wishlist-btn');
+    if (wishBtn) wishBtn.onclick = () => FashionAPI.toggleWishlist(p.id, wishBtn);
+  }
+  const stickyAddBtn = document.querySelector('.sticky-buy .btn-primary');
+  if (stickyAddBtn) { stickyAddBtn.removeAttribute('href'); stickyAddBtn.onclick = addToCart; }
+
+  // Reviews
+  renderReviews(product.reviews || []);
+}
+
+async function addToCart() {
+  if (!FashionAPI.isLoggedIn()) { location.href = '/login.html?redirect=' + encodeURIComponent(location.pathname + location.search); return; }
+  if (!selectedSize) { window.fashionAI?.toast('Please select a size', 'error'); return; }
+  try {
+    const data = await FashionAPI.post('/cart', { product_id: parseInt(productId), quantity: qty, size: selectedSize, color: selectedColor || '' });
+    window.fashionAI?.updateCartCount(data.item_count);
+    window.fashionAI?.toast('Added to cart', 'success');
+  } catch(e) { window.fashionAI?.toast(e.message, 'error'); }
+}
+
+function renderReviews(reviews) {
+  const reviewList = document.querySelector('.review-list');
+  if (!reviewList) return;
+  const ratingBig = document.querySelector('#reviews [style*="font-size:64px"]');
+  if (ratingBig && product) ratingBig.textContent = (product.rating||0).toFixed(1);
+  const starsDisplay = document.querySelector('#reviews .stars[style*="font-size:18px"]');
+  if (starsDisplay && product) starsDisplay.textContent = FashionAPI.stars(product.rating);
+  if (reviews.length === 0) {
+    reviewList.innerHTML = '<div style="padding:40px;text-align:center;color:var(--stone);font-size:13px;">No reviews yet. Be the first!</div>';
+    const lmw = document.getElementById('load-more-wrap'); if (lmw) lmw.style.display = 'none';
+    return;
+  }
+  reviewList.innerHTML = reviews.map(r => `
+    <div class="review-item">
+      <div class="review-header">
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;">${r.user_name||'Customer'} <span style="font-size:10px;background:var(--brown);color:var(--white);padding:2px 8px;margin-left:6px;">Verified</span></div><div class="stars">${FashionAPI.stars(r.rating)}</div></div>
+        <div style="font-size:11px;color:var(--stone);">${FashionAPI.fmtDate(r.created_at)}</div>
+      </div>
+      <div class="review-headline">${r.title||''}</div>
+      <div class="review-body">${r.comment||r.body||''}</div>
+    </div>`).join('');
+  const lmw = document.getElementById('load-more-wrap'); if (lmw) lmw.style.display = 'none';
+}
+
+async function loadRelated() {
+  try {
+    const data = await FashionAPI.get(`/products?cat=${encodeURIComponent(product.category)}&limit=5`);
+    const related = (data.products||[]).filter(p => p.id !== parseInt(productId)).slice(0, 4);
+    const relGrid = document.querySelector('.related-grid');
+    if (relGrid && related.length > 0) relGrid.innerHTML = related.map(p => FashionAPI.productCardHTML(p)).join('');
+  } catch(e) {}
+}
+
+// Quantity
+function changeQty(delta) {
+  qty = Math.max(1, Math.min(10, qty + delta));
+  document.getElementById('qty-val').textContent = qty;
+}
+
+// Sticky buy bar on scroll
+const ctaEl = document.getElementById('pdp-cta');
+const stickyBar = document.getElementById('sticky-buy');
+if (ctaEl && stickyBar) {
+  new IntersectionObserver(entries => stickyBar.classList.toggle('visible', !entries[0].isIntersecting), { threshold: 0 }).observe(ctaEl);
+}
+
+// Review modal
+let currentRating = 0;
+function openReview() { document.getElementById('review-modal').classList.add('open'); }
+function closeReview() { document.getElementById('review-modal').classList.remove('open'); }
+function setRating(n) {
+  currentRating = n;
+  document.querySelectorAll('#star-picker span').forEach((s, i) => { s.style.color = i < n ? '#b07d0a' : 'var(--fog)'; });
+}
+async function submitReview() {
+  const h = document.getElementById('review-headline-input').value.trim();
+  const b = document.getElementById('review-body-input').value.trim();
+  if (!currentRating || !h || !b) return;
+  if (!FashionAPI.isLoggedIn()) { location.href = '/login.html?redirect=' + encodeURIComponent(location.pathname + location.search); return; }
+  try {
+    await FashionAPI.post('/products/' + productId + '/reviews', { rating: currentRating, title: h, comment: b });
+    closeReview();
+    window.fashionAI?.toast('Review submitted — thank you!', 'success');
+    const updated = await FashionAPI.get('/products/' + productId);
+    product = updated;
+    renderReviews(updated.reviews || []);
+  } catch(e) { window.fashionAI?.toast(e.message, 'error'); }
+}
+
+loadProduct();
+</script>
+</body>
+</html>

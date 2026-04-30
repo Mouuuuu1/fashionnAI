@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Search Results — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css"/>
+<style>
+.search-hero { margin-top: var(--nav-h); background: var(--ink); padding: 56px 60px; position: relative; overflow: hidden; }
+.search-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 50%, rgba(110,99,83,.2) 0%, transparent 60%); pointer-events: none; }
+.search-bar-large { display: flex; max-width: 640px; border: 1px solid rgba(209,208,203,.25); background: rgba(255,255,255,.06); backdrop-filter: blur(8px); }
+.search-bar-large input { flex: 1; background: transparent; border: none; padding: 18px 24px; font-size: 16px; color: var(--white); outline: none; font-family: 'Quicksand', sans-serif; }
+.search-bar-large input::placeholder { color: var(--stone); }
+.search-bar-large button { background: var(--brown); border: none; padding: 0 28px; color: var(--white); display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; white-space: nowrap; transition: background .2s; }
+.search-bar-large button:hover { background: var(--stone); }
+.search-meta { font-size: 13px; color: var(--pebble); margin-top: 20px; }
+.search-meta strong { color: var(--white); }
+.search-suggestions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.suggestion-chip { background: rgba(255,255,255,.06); border: 1px solid rgba(209,208,203,.2); padding: 6px 16px; font-size: 11px; font-weight: 600; letter-spacing: .1em; color: var(--pebble); transition: border-color .2s, color .2s; }
+.suggestion-chip:hover { border-color: var(--pebble); color: var(--fog); }
+.search-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 80vh; }
+.search-sidebar { background: var(--white); border-right: 1px solid var(--fog); padding: 40px 28px; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+.search-content { background: var(--cream); }
+.search-toolbar { background: var(--white); border-bottom: 1px solid var(--fog); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.search-results-grid { padding: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.no-results { text-align: center; padding: 100px 40px; display: none; }
+.no-results.show { display: block; }
+.sort-select { border: 1px solid var(--fog); background: var(--white); padding: 8px 36px 8px 14px; font-family: 'Quicksand', sans-serif; font-size: 12px; font-weight: 600; color: var(--ink); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A887E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; outline: none; cursor: none; transition: border-color .2s; }
+.sort-select:focus { border-color: var(--brown); }
+.related-searches { background: var(--white); border-top: 1px solid var(--fog); padding: 48px 60px; }
+.related-tag { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--fog); padding: 10px 20px; font-size: 12px; font-weight: 600; color: var(--ink); margin: 6px; transition: border-color .2s, background .2s; }
+.related-tag:hover { border-color: var(--brown); background: rgba(110,99,83,.04); }
+.category-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.cat-pill { padding: 6px 18px; border: 1px solid var(--fog); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); background: var(--white); transition: all .2s; cursor: none; }
+.cat-pill:hover { border-color: var(--ink); color: var(--ink); }
+.cat-pill.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+</style>
+</head>
+<body>
+<!-- Search Hero -->
+<section class="search-hero">
+  <div style="position:relative;z-index:1;">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--pebble);margin-bottom:20px;">Search Results</div>
+    <div class="search-bar-large">
+      <input type="text" id="main-search" placeholder="Search garments, brands, styles…" value="linen blazer"/>
+      <button onclick="doSearch()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Search
+      </button>
+    </div>
+    <div class="search-meta">Showing <strong>47 results</strong> for "<strong id="query-label">linen blazer</strong>"</div>
+    <div class="search-suggestions">
+      <span style="font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);align-self:center;">Also try:</span>
+      <a href="search.html?q=blazer" class="suggestion-chip">Blazer</a>
+      <a href="search.html?q=linen+shirt" class="suggestion-chip">Linen Shirt</a>
+      <a href="search.html?q=linen+trousers" class="suggestion-chip">Linen Trousers</a>
+      <a href="search.html?q=summer+linen" class="suggestion-chip">Summer Linen</a>
+      <a href="search.html?q=linen+set" class="suggestion-chip">Linen Set</a>
+    </div>
+  </div>
+</section>
+
+<!-- Search Layout -->
+<div class="search-layout">
+  <!-- Sidebar Filters -->
+  <aside class="search-sidebar">
+    <div style="margin-bottom:24px;">
+      <h2 style="font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.04em;color:var(--ink);">FILTER</h2>
+      <button onclick="clearAll()" style="font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);background:none;border:none;margin-top:4px;text-decoration:underline;">Clear All</button>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">Category</div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> Women</label><span class="filter-count">28</span></div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> Men</label><span class="filter-count">14</span></div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Accessories</label><span class="filter-count">5</span></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">Price (EGP)</div>
+      <div class="price-range">
+        <input type="number" value="0" class="price-range"/>
+        <span style="color:var(--stone);font-size:12px;">—</span>
+        <input type="number" value="8000" class="price-range"/>
+      </div>
+      <div style="font-size:10px;color:var(--stone);margin-top:8px;">EGP 0 — EGP 8,000</div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">Size</div>
+      <div class="size-grid">
+        <button class="size-btn">XS</button><button class="size-btn active">S</button><button class="size-btn active">M</button><button class="size-btn">L</button><button class="size-btn">XL</button>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">Color</div>
+      <div class="color-swatches">
+        <div class="color-swatch" style="background:#2E2E2E;" title="Black"></div>
+        <div class="color-swatch active" style="background:#D1D0CB;border:1px solid var(--fog);" title="Stone"></div>
+        <div class="color-swatch" style="background:#6E6353;" title="Brown"></div>
+        <div class="color-swatch" style="background:#A2A092;" title="Taupe"></div>
+        <div class="color-swatch" style="background:#C4A882;" title="Sand"></div>
+        <div class="color-swatch" style="background:#FAFAF8;border:1px solid var(--fog);" title="White"></div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">Brand</div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> Studio Collection</label><span class="filter-count">18</span></div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Create Premium</label><span class="filter-count">12</span></div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Create Essentials</label><span class="filter-count">9</span></div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> Capsule Line</label><span class="filter-count">8</span></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">Availability</div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox" checked/> In Stock</label><span class="filter-count">41</span></div>
+      <div class="filter-option"><label class="filter-checkbox"><input type="checkbox"/> On Sale</label><span class="filter-count">9</span></div>
+    </div>
+
+    <button class="btn btn-primary btn-full" style="margin-top:8px;">Apply Filters</button>
+  </aside>
+
+  <!-- Results -->
+  <div class="search-content">
+    <div class="search-toolbar">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--stone);">47 products</span>
+        <div class="category-pills">
+          <button class="cat-pill active" onclick="filterCat(this,'all')">All (47)</button>
+          <button class="cat-pill" onclick="filterCat(this,'women')">Women (28)</button>
+          <button class="cat-pill" onclick="filterCat(this,'men')">Men (14)</button>
+          <button class="cat-pill" onclick="filterCat(this,'accessories')">Accessories (5)</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <select class="sort-select">
+          <option>Most Relevant</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Newest</option>
+          <option>Best Rated</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active filter chips -->
+    <div style="padding:12px 32px;background:var(--white);border-bottom:1px solid var(--fog);display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span style="font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);">Active:</span>
+      <span class="filter-chip">Women <button>×</button></span>
+      <span class="filter-chip">Men <button>×</button></span>
+      <span class="filter-chip">S, M <button>×</button></span>
+      <span class="filter-chip">Studio Collection <button>×</button></span>
+      <span class="filter-chip">Stone <button>×</button></span>
+    </div>
+
+    <div class="search-results-grid" id="results-grid">
+      <!-- Row 1 -->
+      <div class="product-card reveal">
+        <div class="product-img">
+          <span class="product-badge badge-new">New</span>
+          <img src="https://placehold.co/400x533/d1d0cb/6e6353?text=Linen+Blazer" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Studio Collection</div>
+          <div class="product-name">Oversized Linen Blazer</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>2,490</span></div>
+          <div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(42)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <span class="product-badge badge-sale">−25%</span>
+          <img src="https://placehold.co/400x533/a2a092/2e2e2e?text=Linen+Co-ord" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn active"><svg width="18" height="18" fill="currentColor" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Create Essentials</div>
+          <div class="product-name">Linen Co-ord Set — Blazer & Trousers</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>3,190</span><span class="product-price-old">EGP 4,290</span></div>
+          <div class="product-rating"><span class="stars">★★★★☆</span><span class="rating-count">(31)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <img src="https://placehold.co/400x533/8a887e/fafaf8?text=Linen+Jacket" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Create Premium</div>
+          <div class="product-name">Tailored Linen Jacket — Men's</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>2,890</span></div>
+          <div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(18)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <span class="product-badge badge-new">New</span>
+          <img src="https://placehold.co/400x533/6e6353/f4f3ef?text=Blazer+Set" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Studio Collection</div>
+          <div class="product-name">Structured Linen Blazer — Camel</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>2,190</span></div>
+          <div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(27)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <span class="product-badge badge-sale">−30%</span>
+          <img src="https://placehold.co/400x533/d1d0cb/8a887e?text=Linen+Dress" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Capsule Line</div>
+          <div class="product-name">Linen Blend Shirt Dress</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>1,290</span><span class="product-price-old">EGP 1,850</span></div>
+          <div class="product-rating"><span class="stars">★★★★☆</span><span class="rating-count">(44)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <img src="https://placehold.co/400x533/a2a092/6e6353?text=Linen+Shirt" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Create Essentials</div>
+          <div class="product-name">Relaxed Linen Shirt — Men's</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>890</span></div>
+          <div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(63)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <span class="product-badge badge-out">Sold Out</span>
+          <img src="https://placehold.co/400x533/2e2e2e/d1d0cb?text=Linen+Coat" alt="" style="opacity:.6;"/>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;opacity:.65;">
+          <div class="product-brand">Create Premium</div>
+          <div class="product-name">Double-Breasted Linen Coat</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>4,890</span></div>
+          <div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(19)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <img src="https://placehold.co/400x533/d1d0cb/2e2e2e?text=Linen+Skirt" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Studio Collection</div>
+          <div class="product-name">Pleated Linen Maxi Skirt</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>1,490</span></div>
+          <div class="product-rating"><span class="stars">★★★★☆</span><span class="rating-count">(22)</span></div>
+        </a>
+      </div>
+
+      <div class="product-card reveal">
+        <div class="product-img">
+          <span class="product-badge badge-new">New</span>
+          <img src="https://placehold.co/400x533/8a887e/d1d0cb?text=Linen+Trousers" alt=""/>
+          <div class="product-overlay">
+            <a href="cart.html" class="overlay-btn">Add to Cart</a>
+            <a href="try-on.html" class="overlay-btn icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg></a>
+          </div>
+          <button class="wishlist-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+        </div>
+        <a href="product.html" class="product-info" style="display:block;">
+          <div class="product-brand">Create Essentials</div>
+          <div class="product-name">Wide-Leg Linen Trousers</div>
+          <div class="product-price-row"><span class="product-price"><span class="egp">EGP</span>1,690</span></div>
+          <div class="product-rating"><span class="stars">★★★★★</span><span class="rating-count">(36)</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- No Results State (hidden) -->
+    <div class="no-results" id="no-results">
+      <div style="font-size:48px;margin-bottom:24px;opacity:.15;">🔍</div>
+      <div style="font-family:'Anton',sans-serif;font-size:32px;letter-spacing:.02em;color:var(--ink);margin-bottom:12px;">NO RESULTS FOUND</div>
+      <div style="font-size:14px;color:var(--stone);line-height:1.75;max-width:360px;margin:0 auto 32px;">We couldn't find anything matching your search. Try different keywords or browse our categories.</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="catalog.html" class="btn btn-primary">Browse All Products</a>
+        <a href="catalog.html?sale=1" class="btn btn-ghost">Shop Sale</a>
+      </div>
+    </div>
+
+    <div class="pagination" style="padding-bottom:48px;">
+      <button class="page-btn arrow">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <span style="padding:0 8px;color:var(--stone);">…</span>
+      <button class="page-btn">6</button>
+      <button class="page-btn arrow">›</button>
+    </div>
+  </div>
+</div>
+
+<!-- Related Searches -->
+<div class="related-searches">
+  <div class="section-label">Explore More</div>
+  <h2 style="font-family:'Anton',sans-serif;font-size:28px;letter-spacing:-.01em;color:var(--ink);margin-bottom:24px;">Related Searches</h2>
+  <div>
+    <a href="search.html?q=blazer" class="related-tag">Blazer →</a>
+    <a href="search.html?q=summer+essentials" class="related-tag">Summer Essentials →</a>
+    <a href="search.html?q=neutral+tones" class="related-tag">Neutral Tones →</a>
+    <a href="search.html?q=linen+set" class="related-tag">Linen Sets →</a>
+    <a href="search.html?q=workwear" class="related-tag">Workwear →</a>
+    <a href="search.html?q=minimalist" class="related-tag">Minimalist →</a>
+    <a href="search.html?q=oversized" class="related-tag">Oversized Fit →</a>
+    <a href="search.html?q=co-ord" class="related-tag">Co-ord Sets →</a>
+    <a href="search.html?q=casual+chic" class="related-tag">Casual Chic →</a>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+let currentQ = params.get('q') || '';
+let currentSort = 'newest';
+let currentPage = 1;
+
+document.getElementById('main-search').value = currentQ;
+if (currentQ) document.getElementById('query-label').textContent = currentQ;
+
+function doSearch() {
+  const v = document.getElementById('main-search').value.trim();
+  if (v) location.href = 'search.html?q=' + encodeURIComponent(v);
+}
+document.getElementById('main-search').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+async function loadResults(page) {
+  currentPage = page || 1;
+  const grid = document.getElementById('results-grid');
+  const noResults = document.getElementById('no-results');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--stone);">Loading…</div>';
+
+  const sortMap = { 'newest': 'newest', 'price_asc': 'price_asc', 'price_desc': 'price_desc', 'rating': 'rating' };
+  const sortEl = document.querySelector('.sort-select');
+  const sortVal = sortEl ? sortMap[sortEl.value] || 'newest' : 'newest';
+
+  try {
+    const qs = new URLSearchParams();
+    if (currentQ) qs.set('q', currentQ);
+    qs.set('sort', sortVal);
+    qs.set('page', currentPage);
+    qs.set('limit', 9);
+    const data = await FashionAPI.get('/products?' + qs.toString());
+    const products = data.products || [];
+    const total = data.total || 0;
+
+    // Update meta
+    const metaEl = document.querySelector('.search-meta');
+    if (metaEl) metaEl.innerHTML = `Showing <strong>${total} result${total!==1?'s':''}</strong>${currentQ?' for "<strong>'+currentQ+'</strong>"':''}`;
+    const countEl = document.querySelector('.search-toolbar span:first-child');
+    if (countEl) countEl.textContent = total + ' products';
+
+    if (products.length === 0) {
+      grid.innerHTML = '';
+      noResults.classList.add('show');
+      document.querySelector('.pagination')?.style && (document.querySelector('.pagination').style.display = 'none');
+    } else {
+      noResults.classList.remove('show');
+      grid.innerHTML = products.map(p => FashionAPI.productCardHTML(p)).join('');
+      renderPagination(data.pages || 1, currentPage);
+    }
+  } catch(e) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--danger);">Could not load results.</div>';
+  }
+}
+
+function renderPagination(totalPages, current) {
+  const pag = document.querySelector('.search-layout + * .pagination, .search-content .pagination');
+  if (!pag || totalPages <= 1) { if (pag) pag.innerHTML = ''; return; }
+  let html = `<button class="page-btn arrow" onclick="loadResults(${Math.max(1,current-1)})">‹</button>`;
+  for (let i = 1; i <= Math.min(totalPages, 7); i++) {
+    html += `<button class="page-btn ${i===current?'active':''}" onclick="loadResults(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn arrow" onclick="loadResults(${Math.min(totalPages,current+1)})">›</button>`;
+  pag.innerHTML = html;
+}
+
+function clearAll() {
+  document.querySelectorAll('.filter-checkbox input').forEach(i => i.checked = false);
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.filter-chip').forEach(c => c.remove());
+  loadResults(1);
+}
+
+document.querySelectorAll('.size-btn:not(.out)').forEach(b => b.addEventListener('click', () => b.classList.toggle('active')));
+document.querySelectorAll('.color-swatch').forEach(s => s.addEventListener('click', () => {
+  document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
+  s.classList.add('active');
+}));
+document.querySelector('.sort-select')?.addEventListener('change', () => loadResults(1));
+
+function filterCat(btn, cat) {
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+if (currentQ) loadResults(1);
+else {
+  // Show trending/featured if no query
+  FashionAPI.get('/products?sort=newest&limit=9').then(data => {
+    const grid = document.getElementById('results-grid');
+    grid.innerHTML = (data.products||[]).map(p => FashionAPI.productCardHTML(p)).join('');
+    const metaEl = document.querySelector('.search-meta');
+    if (metaEl) metaEl.innerHTML = `Showing <strong>${data.total}</strong> products — enter a search term above`;
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
