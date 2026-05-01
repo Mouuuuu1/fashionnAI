@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Order Confirmed — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.confirm-page { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); display: flex; flex-direction: column; }
+.confirm-hero { background: var(--ink); padding: 80px 60px; text-align: center; position: relative; overflow: hidden; }
+.confirm-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(110,99,83,.25) 0%, transparent 60%); }
+.checkmark { width: 72px; height: 72px; border-radius: 50%; background: rgba(39,174,96,.15); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; position: relative; z-index: 1; animation: scale-in .5s cubic-bezier(.23,1,.32,1) both; }
+@keyframes scale-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.order-num { font-family: 'Anton', sans-serif; font-size: clamp(48px, 5vw, 80px); line-height: 1; letter-spacing: -.02em; color: var(--white); margin: 16px 0; position: relative; z-index: 1; }
+.confirm-hero p { font-size: 14px; color: var(--pebble); position: relative; z-index: 1; }
+.confirm-body { padding: 80px 60px; background: var(--cream); flex: 1; }
+.confirm-grid { display: grid; grid-template-columns: 1fr 380px; gap: 48px; max-width: 1100px; margin: 0 auto; }
+.confirm-section { background: var(--white); padding: 40px; margin-bottom: 24px; }
+.confirm-section-title { font-size: 10px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--stone); margin-bottom: 20px; }
+.next-steps { display: flex; flex-direction: column; gap: 16px; }
+.next-step { display: flex; align-items: flex-start; gap: 16px; }
+.step-icon { width: 40px; height: 40px; background: var(--cream); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
+.step-info-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.step-info-text { font-size: 12px; color: var(--stone); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="confirm-page">
+  <!-- Hero -->
+  <div class="confirm-hero">
+    <div class="checkmark">
+      <svg width="32" height="32" fill="none" stroke="var(--success)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div style="font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--success);position:relative;z-index:1;">Order Confirmed</div>
+    <div class="order-num">#FA-2025-04872</div>
+    <p>Thank you! Your order has been received. A confirmation email has been sent to <strong style="color:var(--fog);">sara@example.com</strong></p>
+    <p style="margin-top:8px;">Estimated delivery: <strong style="color:var(--fog);">3–5 business days</strong></p>
+  </div>
+
+  <!-- Body -->
+  <div class="confirm-body">
+    <div class="confirm-grid">
+      <div>
+        <!-- Order items -->
+        <div class="confirm-section">
+          <div class="confirm-section-title">Order Items (3)</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;gap:16px;align-items:center;"><img src="https://placehold.co/72x96/d1d0cb/6e6353?text=" alt="" style="width:72px;height:96px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Oversized Linen Blazer</div><div style="font-size:12px;color:var(--stone);margin-top:4px;">M · Stone Beige · 1×</div></div><div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">EGP 2,490</div></div>
+            <div style="display:flex;gap:16px;align-items:center;"><img src="https://placehold.co/72x96/a2a092/2e2e2e?text=" alt="" style="width:72px;height:96px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Minimal Midi Slip Dress</div><div style="font-size:12px;color:var(--stone);margin-top:4px;">S · Black · 1×</div></div><div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">EGP 1,290</div></div>
+            <div style="display:flex;gap:16px;align-items:center;"><img src="https://placehold.co/72x96/8a887e/fafaf8?text=" alt="" style="width:72px;height:96px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">Wide-Leg Tailored Trousers</div><div style="font-size:12px;color:var(--stone);margin-top:4px;">M · Warm Stone · 1×</div></div><div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">EGP 1,890</div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="summary-line total" style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;color:var(--ink);"><span>Order Total</span><span>EGP 5,774</span></div>
+        </div>
+
+        <!-- Shipping info -->
+        <div class="confirm-section">
+          <div class="confirm-section-title">Shipping Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div><div style="font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Delivery Address</div><div style="font-size:13px;color:var(--ink);line-height:1.7;">Sarah Mohamed<br/>15 Nile Street, Dokki<br/>Giza, Cairo 12311</div></div>
+            <div><div style="font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Shipping Method</div><div style="font-size:13px;color:var(--ink);line-height:1.7;">Standard Delivery<br/>3–5 business days<br/>Free</div></div>
+          </div>
+        </div>
+
+        <!-- Next steps -->
+        <div class="confirm-section">
+          <div class="confirm-section-title">What Happens Next</div>
+          <div class="next-steps">
+            <div class="next-step"><div class="step-icon">📧</div><div><div class="step-info-title">Confirmation Email</div><div class="step-info-text">A confirmation has been sent to sara@example.com with your full order details.</div></div></div>
+            <div class="next-step"><div class="step-icon">📦</div><div><div class="step-info-title">Being Prepared</div><div class="step-info-text">Our team is preparing your order now. You will receive a tracking number once it ships.</div></div></div>
+            <div class="next-step"><div class="step-icon">🚚</div><div><div class="step-info-title">Free Delivery</div><div class="step-info-text">Arrives within 3–5 business days to your specified address.</div></div></div>
+            <div class="next-step"><div class="step-icon">↩</div><div><div class="step-info-title">Free Returns</div><div class="step-info-text">You have 14 days from delivery to return any item free of charge.</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <div class="confirm-section">
+          <div class="confirm-section-title">Track Your Order</div>
+          <div style="background:var(--cream);padding:20px;text-align:center;margin-bottom:20px;">
+            <div style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Order Number</div>
+            <div style="font-family:'Anton',sans-serif;font-size:24px;letter-spacing:.08em;color:var(--ink);">#FA-2025-04872</div>
+          </div>
+          <a href="order-detail.html" class="btn btn-ghost btn-full" style="justify-content:center;margin-bottom:12px;">Track Order</a>
+          <a href="orders.html" class="btn btn-primary btn-full" style="justify-content:center;">View All Orders</a>
+        </div>
+
+        <div class="confirm-section">
+          <div class="confirm-section-title">Share Your Feedback</div>
+          <p style="font-size:13px;color:var(--stone);line-height:1.7;margin-bottom:16px;">Once your order arrives, rate your items and help other customers make great choices.</p>
+          <div style="font-size:11px;color:var(--pebble);">You can write reviews from the order details page after delivery.</div>
+        </div>
+
+        <div class="confirm-section" style="background:var(--ink);color:var(--white);">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--pebble);margin-bottom:12px;">Continue Shopping</div>
+          <p style="font-size:13px;color:var(--stone);line-height:1.7;margin-bottom:16px;">Browse the latest collections and exclusive offers.</p>
+          <a href="catalog.html" class="btn btn-primary light btn-full" style="justify-content:center;">Shop the Collection</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const orderId = params.get('id');
+const orderNum = params.get('num');
+if (orderNum) {
+  const numEl = document.querySelector('.order-num');
+  if (numEl) numEl.textContent = orderNum;
+}
+if (orderId) {
+  FashionAPI.get('/orders/' + orderId).then(order => {
+    // Update email
+    const emailEl = document.querySelector('.confirm-hero strong');
+    const user = FashionAPI.user;
+    if (emailEl && user) emailEl.textContent = user.email;
+    // Update items
+    const items = order.items || [];
+    const itemsContainer = document.querySelector('.confirm-section [style*="flex-direction:column;gap:16px"]');
+    const countEl = document.querySelector('.confirm-section-title');
+    if (countEl) countEl.textContent = `Order Items (${items.length})`;
+    if (itemsContainer) {
+      itemsContainer.innerHTML = items.map(i => {
+        const img = i.image || `https://placehold.co/72x96/d1d0cb/6e6353?text=`;
+        return `<div style="display:flex;gap:16px;align-items:center;">
+          <img src="${img}" alt="${i.name}" style="width:72px;height:96px;object-fit:cover;"/>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--ink);">${i.name}</div><div style="font-size:12px;color:var(--stone);margin-top:4px;">${i.size||''} · ${i.color||''} · ${i.quantity}×</div></div>
+          <div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">${FashionAPI.fmt(i.price * i.quantity)}</div>
+        </div>`;
+      }).join('');
+    }
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
