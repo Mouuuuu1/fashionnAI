@@ -4,7 +4,8 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const db = new Database(path.join(__dirname, 'fashionai.db'));
+const dbPath = process.env.NODE_ENV === 'test' ? ':memory:' : path.join(__dirname, 'fashionai.db');
+const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
@@ -229,5 +230,21 @@ function seed() {
 }
 
 seed();
+
+export function reseedForTests() {
+  db.exec(`
+    DELETE FROM order_items;
+    DELETE FROM cart_items;
+    DELETE FROM wishlist_items;
+    DELETE FROM reviews;
+    DELETE FROM addresses;
+    DELETE FROM orders;
+    DELETE FROM coupons;
+    DELETE FROM products;
+    DELETE FROM users;
+  `);
+  try { db.exec('DELETE FROM sqlite_sequence'); } catch {}
+  seed();
+}
 
 export default db;

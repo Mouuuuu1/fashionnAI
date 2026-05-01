@@ -92,11 +92,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n  FinalQA API running at http://localhost:${PORT}`);
-  console.log(`  EP-1: User Management & Authentication`);
-  console.log(`  EP-2: Product Catalog & Search`);
-  console.log(`\n  Test credentials:`);
-  console.log(`    Admin:    admin@fashionai.com / admin123`);
-  console.log(`    Customer: sara@example.com / password123\n`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`\n  FinalQA API running at http://localhost:${PORT}`);
+    console.log(`  EP-1: User Management & Authentication`);
+    console.log(`  EP-2: Product Catalog & Search`);
+    console.log(`\n  Test credentials:`);
+    console.log(`    Admin:    admin@fashionai.com / admin123`);
+    console.log(`    Customer: sara@example.com / password123\n`);
+  });
+}
+
+export default app;
