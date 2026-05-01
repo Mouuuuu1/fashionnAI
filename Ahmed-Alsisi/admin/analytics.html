@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Analytics — FashionAI Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../style.css" />
+<style>
+.chart-card { background: var(--white); padding: 32px; margin-bottom: 24px; }
+.chart-title { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+.chart-area { position: relative; height: 220px; }
+.svg-chart { width: 100%; height: 100%; }
+.metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-bottom: 24px; }
+.metric-box { background: var(--white); padding: 28px 24px; text-align: center; }
+.metric-val { font-family: 'Anton', sans-serif; font-size: 36px; line-height: 1; color: var(--ink); }
+.metric-label { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); margin-top: 8px; }
+.metric-delta { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.metric-delta.up { color: var(--success); }
+.metric-delta.down { color: var(--danger); }
+.top-products { display: flex; flex-direction: column; gap: 0; }
+.top-product-row { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--fog); }
+.top-product-row:last-child { border-bottom: none; }
+.rev-bar-wrap { flex: 1; height: 6px; background: var(--fog); border-radius: 3px; overflow: hidden; }
+.rev-bar { height: 100%; border-radius: 3px; background: var(--brown); }
+.period-selector { display: flex; gap: 0; }
+.period-btn { padding: 6px 14px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--fog); background: var(--white); color: var(--stone); cursor: none; }
+.period-btn + .period-btn { border-left: none; }
+.period-btn.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div style="padding:24px 20px 32px;">
+      <a href="../index.html" style="font-family:'Anton',sans-serif;font-size:18px;color:var(--white);letter-spacing:.05em;display:block;margin-bottom:4px;">FASHIONAI</a>
+      <div style="font-size:9px;color:var(--pebble);letter-spacing:.2em;text-transform:uppercase;">Admin Panel</div>
+    </div>
+    <nav>
+      <a href="index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/></svg>
+        Orders
+      </a>
+      <a href="products.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+        Products
+      </a>
+      <a href="inventory.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Inventory
+      </a>
+      <a href="analytics.html" class="admin-nav-link active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="users.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="../index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        View Storefront
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="login.html" class="admin-nav-link" style="color:var(--stone);">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;">
+      <div>
+        <h1 style="font-family:'Anton',sans-serif;font-size:36px;letter-spacing:-.02em;color:var(--ink);">ANALYTICS</h1>
+        <p style="font-size:13px;color:var(--stone);margin-top:4px;">Sales performance · April 2025</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div class="period-selector">
+          <button class="period-btn" onclick="setPeriod(this)">7D</button>
+          <button class="period-btn active" onclick="setPeriod(this)">30D</button>
+          <button class="period-btn" onclick="setPeriod(this)">90D</button>
+          <button class="period-btn" onclick="setPeriod(this)">YTD</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="alert('Exporting analytics report…')">Export PDF</button>
+      </div>
+    </div>
+
+    <!-- Summary metrics -->
+    <div class="metric-row">
+      <div class="metric-box">
+        <div class="metric-val">EGP 2.1M</div>
+        <div class="metric-label">Total Revenue (30D)</div>
+        <div class="metric-delta up">↑ 18.4% vs last month</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val">3,847</div>
+        <div class="metric-label">Orders (30D)</div>
+        <div class="metric-delta up">↑ 12.1% vs last month</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val">EGP 548</div>
+        <div class="metric-label">Avg. Order Value</div>
+        <div class="metric-delta up">↑ 5.6% vs last month</div>
+      </div>
+    </div>
+
+    <!-- Revenue chart -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <span>Daily Revenue — April 2025 (EGP)</span>
+        <div style="display:flex;gap:16px;">
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:3px;background:var(--brown);border-radius:2px;"></div><span>This Month</span></div>
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:12px;height:3px;background:var(--fog);border-radius:2px;"></div><span>Last Month</span></div>
+        </div>
+      </div>
+      <div class="chart-area">
+        <svg class="svg-chart" viewBox="0 0 900 200" preserveAspectRatio="none">
+          <!-- Grid lines -->
+          <line x1="0" y1="0" x2="900" y2="0" stroke="var(--fog)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="0" y1="50" x2="900" y2="50" stroke="var(--fog)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="0" y1="100" x2="900" y2="100" stroke="var(--fog)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="0" y1="150" x2="900" y2="150" stroke="var(--fog)" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="0" y1="200" x2="900" y2="200" stroke="var(--fog)" stroke-width="1"/>
+          <!-- Last month (lighter) -->
+          <polyline fill="none" stroke="var(--fog)" stroke-width="2" stroke-dasharray="6,3"
+            points="0,140 30,130 60,120 90,135 120,118 150,125 180,115 210,128 240,110 270,120 300,108 330,115 360,100 390,112 420,105 450,95 480,108 510,90 540,100 570,88 600,95 630,80 660,88 690,75 720,85 750,70 780,80 810,68 840,75 870,60 900,70"/>
+          <!-- This month fill -->
+          <path fill="rgba(110,99,83,.1)"
+            d="M0,200 0,130 30,118 60,105 90,120 120,100 150,108 180,95 210,115 240,90 270,100 300,85 330,92 360,78 390,88 420,80 450,68 480,82 510,65 540,78 570,60 600,70 630,55 660,65 690,48 720,60 750,45 780,56 810,40 840,50 870,35 900,45 900,200Z"/>
+          <!-- This month line -->
+          <polyline fill="none" stroke="var(--brown)" stroke-width="2.5"
+            points="0,130 30,118 60,105 90,120 120,100 150,108 180,95 210,115 240,90 270,100 300,85 330,92 360,78 390,88 420,80 450,68 480,82 510,65 540,78 570,60 600,70 630,55 660,65 690,48 720,60 750,45 780,56 810,40 840,50 870,35 900,45"/>
+          <!-- Today dot -->
+          <circle cx="870" cy="35" r="5" fill="var(--brown)"/>
+        </svg>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;">
+        <span style="font-size:10px;color:var(--pebble);">Apr 1</span>
+        <span style="font-size:10px;color:var(--pebble);">Apr 8</span>
+        <span style="font-size:10px;color:var(--pebble);">Apr 15</span>
+        <span style="font-size:10px;color:var(--pebble);">Apr 22</span>
+        <span style="font-size:10px;color:var(--pebble);">Today</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <!-- Top Products -->
+      <div class="chart-card">
+        <div class="chart-title">Top Products by Revenue</div>
+        <div class="top-products">
+          <div class="top-product-row">
+            <div style="font-size:10px;font-weight:700;color:var(--pebble);width:20px;">1</div>
+            <img src="https://placehold.co/40x53/d1d0cb/6e6353?text=" style="width:36px;height:48px;object-fit:cover;"/>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--ink);">Oversized Linen Blazer</div>
+              <div style="font-size:10px;color:var(--stone);">Studio Collection · 214 sold</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 533K</div>
+              <div class="rev-bar-wrap" style="max-width:60px;margin-top:4px;"><div class="rev-bar" style="width:100%;"></div></div>
+            </div>
+          </div>
+          <div class="top-product-row">
+            <div style="font-size:10px;font-weight:700;color:var(--pebble);width:20px;">2</div>
+            <img src="https://placehold.co/40x53/6e6353/f4f3ef?text=" style="width:36px;height:48px;object-fit:cover;"/>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--ink);">Double-Faced Wool Overcoat</div>
+              <div style="font-size:10px;color:var(--stone);">Create Premium · 89 sold</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 489K</div>
+              <div class="rev-bar-wrap" style="max-width:60px;margin-top:4px;"><div class="rev-bar" style="width:92%;"></div></div>
+            </div>
+          </div>
+          <div class="top-product-row">
+            <div style="font-size:10px;font-weight:700;color:var(--pebble);width:20px;">3</div>
+            <img src="https://placehold.co/40x53/8a887e/fafaf8?text=" style="width:36px;height:48px;object-fit:cover;"/>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--ink);">Wide-Leg Tailored Trousers</div>
+              <div style="font-size:10px;color:var(--stone);">Studio Collection · 198 sold</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 374K</div>
+              <div class="rev-bar-wrap" style="max-width:60px;margin-top:4px;"><div class="rev-bar" style="width:70%;"></div></div>
+            </div>
+          </div>
+          <div class="top-product-row">
+            <div style="font-size:10px;font-weight:700;color:var(--pebble);width:20px;">4</div>
+            <img src="https://placehold.co/40x53/a2a092/2e2e2e?text=" style="width:36px;height:48px;object-fit:cover;"/>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--ink);">Minimal Midi Slip Dress</div>
+              <div style="font-size:10px;color:var(--stone);">Create Essentials · 287 sold</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 311K</div>
+              <div class="rev-bar-wrap" style="max-width:60px;margin-top:4px;"><div class="rev-bar" style="width:58%;"></div></div>
+            </div>
+          </div>
+          <div class="top-product-row">
+            <div style="font-size:10px;font-weight:700;color:var(--pebble);width:20px;">5</div>
+            <img src="https://placehold.co/40x53/d1d0cb/8a887e?text=" style="width:36px;height:48px;object-fit:cover;"/>
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:var(--ink);">Pleated Maxi Skirt</div>
+              <div style="font-size:10px;color:var(--stone);">Studio Collection · 176 sold</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 262K</div>
+              <div class="rev-bar-wrap" style="max-width:60px;margin-top:4px;"><div class="rev-bar" style="width:49%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Try-On Conversion -->
+      <div class="chart-card">
+        <div class="chart-title">AI Try-On Impact</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="padding:20px 0;border-bottom:1px solid var(--fog);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Try-On Sessions (30D)</div>
+            <div style="font-family:'Anton',sans-serif;font-size:36px;color:var(--ink);">84,291</div>
+            <div style="font-size:11px;color:var(--success);margin-top:4px;font-weight:700;">↑ 34.2% vs last month</div>
+          </div>
+          <div style="padding:20px 0;border-bottom:1px solid var(--fog);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Try-On → Purchase Conversion</div>
+            <div style="font-family:'Anton',sans-serif;font-size:36px;color:var(--brown);">38.4%</div>
+            <div style="font-size:11px;color:var(--stone);margin-top:4px;">vs 14.2% without try-on</div>
+          </div>
+          <div style="padding:20px 0;border-bottom:1px solid var(--fog);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Return Rate After Try-On</div>
+            <div style="font-family:'Anton',sans-serif;font-size:36px;color:var(--success);">4.1%</div>
+            <div style="font-size:11px;color:var(--stone);margin-top:4px;">vs 18.7% industry average</div>
+          </div>
+          <div style="padding:20px 0;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Revenue Attributed to Try-On</div>
+            <div style="font-family:'Anton',sans-serif;font-size:36px;color:var(--ink);">EGP 807K</div>
+            <div style="font-size:11px;color:var(--success);margin-top:4px;font-weight:700;">38.5% of total revenue</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders by category -->
+    <div class="chart-card">
+      <div class="chart-title">Orders by Category</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:24px;">
+        <div style="text-align:center;">
+          <div style="height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px;">
+            <div style="width:40px;background:var(--brown);border-radius:2px 2px 0 0;height:100%;"></div>
+          </div>
+          <div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">58%</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-top:4px;">Women</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px;">
+            <div style="width:40px;background:var(--stone);border-radius:2px 2px 0 0;height:40%;"></div>
+          </div>
+          <div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">23%</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-top:4px;">Men</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px;">
+            <div style="width:40px;background:var(--pebble);border-radius:2px 2px 0 0;height:24%;"></div>
+          </div>
+          <div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">11%</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-top:4px;">Accessories</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px;">
+            <div style="width:40px;background:var(--fog);border-radius:2px 2px 0 0;height:14%;"></div>
+          </div>
+          <div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">6%</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-top:4px;">Kids</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px;">
+            <div style="width:40px;background:rgba(110,99,83,.25);border-radius:2px 2px 0 0;height:5%;"></div>
+          </div>
+          <div style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">2%</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-top:4px;">Other</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../api.js"></script>
+<script src="../components.js"></script>
+<script>
+if (!FashionAPI.requireAuth(true)) { /* redirecting */ }
+document.querySelector('a[href="login.html"]').onclick = (e) => { e.preventDefault(); FashionAPI.logout(); };
+
+async function loadAnalytics() {
+  try {
+    const [stats, analytics] = await Promise.all([
+      FashionAPI.get('/admin/stats'),
+      FashionAPI.get('/admin/analytics')
+    ]);
+    const kpis = document.querySelectorAll('.kpi-value');
+    if (kpis[0]) kpis[0].textContent = FashionAPI.fmt(stats.revenue || 0);
+    if (kpis[1]) kpis[1].textContent = stats.totalOrders || 0;
+    if (kpis[2]) kpis[2].textContent = stats.totalUsers || 0;
+    const avgOrder = stats.totalOrders > 0 ? Math.round((stats.revenue||0) / stats.totalOrders) : 0;
+    if (kpis[3]) kpis[3].textContent = FashionAPI.fmt(avgOrder);
+  } catch(e) {}
+}
+
+function setPeriod(btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+loadAnalytics();
+</script>
+</body>
+</html>

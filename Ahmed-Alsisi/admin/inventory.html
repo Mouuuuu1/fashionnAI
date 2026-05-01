@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inventory — FashionAI Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../style.css" />
+<style>
+.stock-level { display: flex; align-items: center; gap: 8px; }
+.stock-bar-wrap { flex: 1; height: 6px; background: var(--fog); border-radius: 3px; overflow: hidden; max-width: 80px; }
+.stock-bar { height: 100%; border-radius: 3px; }
+.stock-bar.ok { background: var(--success); }
+.stock-bar.low { background: #f39c12; }
+.stock-bar.out { background: var(--danger); }
+.inv-row { display: grid; grid-template-columns: 60px 1fr 80px 160px 120px 120px 140px; align-items: center; padding: 0 24px; border-bottom: 1px solid var(--fog); transition: background .15s; }
+.inv-row:hover { background: var(--cream); }
+.inv-row > * { padding: 16px 8px; }
+.alert-card { background: rgba(231,76,60,.06); border-left: 3px solid var(--danger); padding: 16px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+.alert-item { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.qty-adjust { display: flex; align-items: center; gap: 6px; }
+.qty-adj-btn { width: 24px; height: 24px; border: 1px solid var(--fog); background: var(--white); font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: none; transition: border-color .15s; }
+.qty-adj-btn:hover { border-color: var(--brown); }
+.qty-adj-val { width: 40px; text-align: center; font-size: 13px; font-weight: 600; color: var(--ink); border: 1px solid var(--fog); padding: 2px 4px; }
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div style="padding:24px 20px 32px;">
+      <a href="../index.html" style="font-family:'Anton',sans-serif;font-size:18px;color:var(--white);letter-spacing:.05em;display:block;margin-bottom:4px;">FASHIONAI</a>
+      <div style="font-size:9px;color:var(--pebble);letter-spacing:.2em;text-transform:uppercase;">Admin Panel</div>
+    </div>
+    <nav>
+      <a href="index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/></svg>
+        Orders
+      </a>
+      <a href="products.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+        Products
+      </a>
+      <a href="inventory.html" class="admin-nav-link active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Inventory
+      </a>
+      <a href="analytics.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="users.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="../index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        View Storefront
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="login.html" class="admin-nav-link" style="color:var(--stone);">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;">
+      <div>
+        <h1 style="font-family:'Anton',sans-serif;font-size:36px;letter-spacing:-.02em;color:var(--ink);">INVENTORY</h1>
+        <p style="font-size:13px;color:var(--stone);margin-top:4px;">840 SKUs · 7 low-stock alerts · 3 out of stock</p>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-ghost btn-sm" onclick="alert('Exporting inventory CSV…')">Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Bulk stock adjustment (demo only)')">Bulk Adjust</button>
+      </div>
+    </div>
+
+    <!-- Low stock alerts -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--danger);margin-bottom:12px;">⚠ Low Stock Alerts</div>
+      <div class="alert-card">
+        <div style="display:flex;flex-wrap:wrap;gap:20px;">
+          <div class="alert-item">
+            <img src="https://placehold.co/40x53/6e6353/f4f3ef?text=" style="width:40px;height:53px;object-fit:cover;"/>
+            <div><div style="font-weight:700;color:var(--ink);">Double-Faced Wool Overcoat</div><div style="font-size:11px;color:var(--stone);">0 units — Out of stock</div></div>
+          </div>
+          <div class="alert-item">
+            <img src="https://placehold.co/40x53/8a887e/fafaf8?text=" style="width:40px;height:53px;object-fit:cover;"/>
+            <div><div style="font-weight:700;color:var(--ink);">Wide-Leg Tailored Trousers — Size XS</div><div style="font-size:11px;color:var(--stone);">2 units remaining</div></div>
+          </div>
+          <div class="alert-item">
+            <img src="https://placehold.co/40x53/d1d0cb/6e6353?text=" style="width:40px;height:53px;object-fit:cover;"/>
+            <div><div style="font-weight:700;color:var(--ink);">Oversized Linen Blazer — Size M</div><div style="font-size:11px;color:var(--stone);">3 units remaining</div></div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="alert('Restock request sent (demo only)')">Request Restock</button>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="background:var(--white);padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--fog);">
+      <input class="form-input" type="text" placeholder="Search by product name or SKU…" style="flex:1;max-width:320px;padding:8px 12px;font-size:12px;"/>
+      <select class="form-select" style="padding:8px 12px;font-size:12px;width:auto;"><option>All Stock Status</option><option>In Stock</option><option>Low Stock (≤5)</option><option>Out of Stock</option></select>
+      <select class="form-select" style="padding:8px 12px;font-size:12px;width:auto;"><option>All Categories</option><option>Women</option><option>Men</option><option>Accessories</option></select>
+    </div>
+
+    <!-- Inventory table -->
+    <div style="background:var(--white);">
+      <div class="inv-row" style="background:var(--white);border-bottom:1px solid var(--fog);">
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Image</div>
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Product / SKU</div>
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Price</div>
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Stock Level</div>
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Units</div>
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Status</div>
+        <div style="padding:12px 8px;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);">Adjust Stock</div>
+      </div>
+
+      <div class="inv-row">
+        <div><img src="https://placehold.co/88x116/d1d0cb/6e6353?text=" style="width:44px;height:58px;object-fit:cover;"/></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Oversized Linen Blazer</div><div style="font-size:11px;color:var(--stone);">SKU: SC-BLZ-001</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 2,490</div>
+        <div class="stock-level"><div class="stock-bar-wrap"><div class="stock-bar ok" style="width:80%;"></div></div><span style="font-size:11px;color:var(--stone);">80%</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);">48</div>
+        <div><span style="font-size:11px;font-weight:700;color:var(--success);">In Stock</span></div>
+        <div class="qty-adjust">
+          <button class="qty-adj-btn" onclick="adjustQty(this,-1)">−</button>
+          <input class="qty-adj-val" type="number" value="48" min="0"/>
+          <button class="qty-adj-btn" onclick="adjustQty(this,1)">+</button>
+          <button style="font-size:10px;padding:4px 10px;border:1px solid var(--brown);background:none;color:var(--brown);font-weight:700;letter-spacing:.08em;" onclick="alert('Stock updated!')">Save</button>
+        </div>
+      </div>
+
+      <div class="inv-row">
+        <div><img src="https://placehold.co/88x116/a2a092/2e2e2e?text=" style="width:44px;height:58px;object-fit:cover;"/></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Minimal Midi Slip Dress</div><div style="font-size:11px;color:var(--stone);">SKU: CE-DRS-014</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 1,290</div>
+        <div class="stock-level"><div class="stock-bar-wrap"><div class="stock-bar ok" style="width:65%;"></div></div><span style="font-size:11px;color:var(--stone);">65%</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);">32</div>
+        <div><span style="font-size:11px;font-weight:700;color:var(--success);">In Stock</span></div>
+        <div class="qty-adjust">
+          <button class="qty-adj-btn" onclick="adjustQty(this,-1)">−</button>
+          <input class="qty-adj-val" type="number" value="32" min="0"/>
+          <button class="qty-adj-btn" onclick="adjustQty(this,1)">+</button>
+          <button style="font-size:10px;padding:4px 10px;border:1px solid var(--brown);background:none;color:var(--brown);font-weight:700;letter-spacing:.08em;" onclick="alert('Stock updated!')">Save</button>
+        </div>
+      </div>
+
+      <div class="inv-row" style="background:rgba(243,156,18,.03);">
+        <div><img src="https://placehold.co/88x116/d1d0cb/6e6353?text=M" style="width:44px;height:58px;object-fit:cover;"/></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Oversized Linen Blazer — Size M</div><div style="font-size:11px;color:var(--stone);">SKU: SC-BLZ-001-M</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 2,490</div>
+        <div class="stock-level"><div class="stock-bar-wrap"><div class="stock-bar low" style="width:15%;"></div></div><span style="font-size:11px;color:#f39c12;">15%</span></div>
+        <div style="font-size:13px;font-weight:700;color:#f39c12;">3</div>
+        <div><span style="font-size:11px;font-weight:700;color:#f39c12;">Low Stock</span></div>
+        <div class="qty-adjust">
+          <button class="qty-adj-btn" onclick="adjustQty(this,-1)">−</button>
+          <input class="qty-adj-val" type="number" value="3" min="0"/>
+          <button class="qty-adj-btn" onclick="adjustQty(this,1)">+</button>
+          <button style="font-size:10px;padding:4px 10px;border:1px solid var(--brown);background:none;color:var(--brown);font-weight:700;letter-spacing:.08em;" onclick="alert('Stock updated!')">Save</button>
+        </div>
+      </div>
+
+      <div class="inv-row" style="background:rgba(231,76,60,.03);">
+        <div><img src="https://placehold.co/88x116/6e6353/f4f3ef?text=" style="width:44px;height:58px;object-fit:cover;opacity:.5;"/></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Double-Faced Wool Overcoat</div><div style="font-size:11px;color:var(--stone);">SKU: CP-OCT-003</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 5,490</div>
+        <div class="stock-level"><div class="stock-bar-wrap"><div class="stock-bar out" style="width:0%;"></div></div><span style="font-size:11px;color:var(--danger);">0%</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--danger);">0</div>
+        <div><span style="font-size:11px;font-weight:700;color:var(--danger);">Out of Stock</span></div>
+        <div class="qty-adjust">
+          <button class="qty-adj-btn" onclick="adjustQty(this,-1)">−</button>
+          <input class="qty-adj-val" type="number" value="0" min="0"/>
+          <button class="qty-adj-btn" onclick="adjustQty(this,1)">+</button>
+          <button style="font-size:10px;padding:4px 10px;border:1px solid var(--brown);background:none;color:var(--brown);font-weight:700;letter-spacing:.08em;" onclick="alert('Stock updated!')">Save</button>
+        </div>
+      </div>
+
+      <div class="inv-row">
+        <div><img src="https://placehold.co/88x116/8a887e/fafaf8?text=" style="width:44px;height:58px;object-fit:cover;"/></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);">Wide-Leg Tailored Trousers</div><div style="font-size:11px;color:var(--stone);">SKU: SC-TRS-027</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">EGP 1,890</div>
+        <div class="stock-level"><div class="stock-bar-wrap"><div class="stock-bar ok" style="width:38%;"></div></div><span style="font-size:11px;color:var(--stone);">38%</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);">19</div>
+        <div><span style="font-size:11px;font-weight:700;color:var(--success);">In Stock</span></div>
+        <div class="qty-adjust">
+          <button class="qty-adj-btn" onclick="adjustQty(this,-1)">−</button>
+          <input class="qty-adj-val" type="number" value="19" min="0"/>
+          <button class="qty-adj-btn" onclick="adjustQty(this,1)">+</button>
+          <button style="font-size:10px;padding:4px 10px;border:1px solid var(--brown);background:none;color:var(--brown);font-weight:700;letter-spacing:.08em;" onclick="alert('Stock updated!')">Save</button>
+        </div>
+      </div>
+
+      <div class="pagination" style="padding:0 16px;">
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn arrow">›</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../api.js"></script>
+<script src="../components.js"></script>
+<script>
+if (!FashionAPI.requireAuth(true)) { /* redirecting */ }
+document.querySelector('a[href="login.html"]').onclick = (e) => { e.preventDefault(); FashionAPI.logout(); };
+
+async function loadInventory() {
+  try {
+    const data = await FashionAPI.get('/admin/inventory');
+    const products = data.products || [];
+    // Find the container that holds the .inv-row header + data rows
+    const container = document.querySelector('.inv-row').parentElement;
+    // Remove old data rows (keep header)
+    container.querySelectorAll('.inv-row:not(:first-child)').forEach(r => r.remove());
+
+    products.forEach(p => {
+      const out = p.stock === 0;
+      const low = !out && p.stock <= 10;
+      const statusColor = out ? 'var(--danger)' : low ? '#f39c12' : 'var(--success)';
+      const statusText = out ? 'Out of Stock' : low ? 'Low Stock' : 'In Stock';
+      const maxStock = 60;
+      const pct = Math.min(100, Math.round((p.stock / maxStock) * 100));
+      const barClass = out ? 'out' : low ? 'low' : 'ok';
+      const img = (Array.isArray(p.images) ? p.images[0] : p.image) || `https://placehold.co/88x116/d1d0cb/6e6353?text=${encodeURIComponent(p.name?.charAt(0)||'?')}`;
+      const price = p.sale_price ?? p.price;
+      const row = document.createElement('div');
+      row.className = 'inv-row';
+      if (out) row.style.background = 'rgba(231,76,60,.03)';
+      else if (low) row.style.background = 'rgba(243,156,18,.03)';
+      row.innerHTML = `
+        <div><img src="${img}" alt="${p.name}" style="width:44px;height:58px;object-fit:cover;${out?'opacity:.5;':''}"/></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--ink);">${p.name}</div><div style="font-size:11px;color:var(--stone);">${p.brand}</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:14px;color:var(--ink);">${FashionAPI.fmt(price)}</div>
+        <div class="stock-level"><div class="stock-bar-wrap"><div class="stock-bar ${barClass}" style="width:${pct}%;"></div></div><span style="font-size:11px;color:${statusColor};">${pct}%</span></div>
+        <div style="font-size:13px;font-weight:700;color:${statusColor};">${p.stock}</div>
+        <div><span style="font-size:11px;font-weight:700;color:${statusColor};">${statusText}</span></div>
+        <div class="qty-adjust">
+          <button class="qty-adj-btn" onclick="adjustQty(this,-1)">−</button>
+          <input class="qty-adj-val" type="number" value="${p.stock}" min="0"/>
+          <button class="qty-adj-btn" onclick="adjustQty(this,1)">+</button>
+          <button style="font-size:10px;padding:4px 10px;border:1px solid var(--brown);background:none;color:var(--brown);font-weight:700;letter-spacing:.08em;" onclick="saveStock(this,${p.id})">Save</button>
+        </div>`;
+      container.appendChild(row);
+    });
+  } catch(e) {}
+}
+
+async function saveStock(btn, productId) {
+  const input = btn.parentElement.querySelector('.qty-adj-val');
+  const stock = parseInt(input.value);
+  try {
+    await FashionAPI.put('/products/' + productId, { stock });
+    window.fashionAI?.toast('Stock updated', 'success');
+  } catch(e) { window.fashionAI?.toast(e.message, 'error'); }
+}
+
+function adjustQty(btn, delta) {
+  const input = btn.parentElement.querySelector('.qty-adj-val');
+  let val = parseInt(input.value) + delta;
+  if (val < 0) val = 0;
+  input.value = val;
+}
+
+loadInventory();
+</script>
+</body>
+</html>

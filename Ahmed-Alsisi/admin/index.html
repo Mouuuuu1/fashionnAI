@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orders Dashboard — FashionAI Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../style.css" />
+<style>
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 32px; }
+.kpi-card { background: var(--white); padding: 32px 28px; position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--fog); }
+.kpi-card.primary::before { background: var(--brown); }
+.kpi-card.success::before { background: var(--success); }
+.kpi-card.warning::before { background: #f39c12; }
+.kpi-card.danger::before { background: var(--danger); }
+.kpi-label { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); margin-bottom: 12px; }
+.kpi-value { font-family: 'Anton', sans-serif; font-size: 40px; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
+.kpi-sub { font-size: 11px; color: var(--stone); margin-top: 8px; }
+.kpi-delta { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.kpi-delta.up { color: var(--success); }
+.kpi-delta.down { color: var(--danger); }
+.orders-table { background: var(--white); }
+.table-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px; border-bottom: 1px solid var(--fog); }
+.filter-tabs { display: flex; gap: 0; }
+.filter-tab { padding: 8px 20px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--fog); background: var(--white); color: var(--stone); cursor: none; transition: all .15s; }
+.filter-tab:first-child { border-radius: 2px 0 0 2px; }
+.filter-tab:last-child { border-radius: 0 2px 2px 0; }
+.filter-tab + .filter-tab { border-left: none; }
+.filter-tab.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th { font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); padding: 14px 28px; text-align: left; border-bottom: 1px solid var(--fog); white-space: nowrap; }
+.admin-table td { padding: 18px 28px; font-size: 13px; color: var(--ink); border-bottom: 1px solid var(--fog); vertical-align: middle; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: var(--cream); }
+.order-id { font-family: 'Anton', sans-serif; font-size: 14px; letter-spacing: .06em; color: var(--brown); }
+.customer-cell { display: flex; align-items: center; gap: 10px; }
+.customer-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--fog); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--stone); flex-shrink: 0; }
+.action-btns { display: flex; gap: 8px; }
+.mini-btn { padding: 6px 14px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--fog); background: none; color: var(--stone); transition: all .15s; white-space: nowrap; }
+.mini-btn:hover { border-color: var(--ink); color: var(--ink); }
+.mini-btn.primary { background: var(--ink); color: var(--white); border-color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div style="padding:24px 20px 32px;">
+      <a href="../index.html" style="font-family:'Anton',sans-serif;font-size:18px;color:var(--white);letter-spacing:.05em;display:block;margin-bottom:4px;">FASHIONAI</a>
+      <div style="font-size:9px;color:var(--pebble);letter-spacing:.2em;text-transform:uppercase;">Admin Panel</div>
+    </div>
+    <nav>
+      <a href="index.html" class="admin-nav-link active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Orders
+      </a>
+      <a href="products.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Products
+      </a>
+      <a href="inventory.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Inventory
+      </a>
+      <a href="analytics.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="users.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="../index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        View Storefront
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="login.html" class="admin-nav-link" style="color:var(--stone);">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;">
+      <div>
+        <h1 style="font-family:'Anton',sans-serif;font-size:36px;letter-spacing:-.02em;color:var(--ink);">ORDERS DASHBOARD</h1>
+        <p style="font-size:13px;color:var(--stone);margin-top:4px;">25 April 2025 — Live overview</p>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-ghost btn-sm" onclick="alert('Exporting CSV…')">Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Sync triggered')">Sync Now</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card primary">
+        <div class="kpi-label">Total Orders Today</div>
+        <div class="kpi-value">147</div>
+        <div class="kpi-delta up">↑ 12% vs yesterday</div>
+        <div class="kpi-sub">Last updated: 14:32</div>
+      </div>
+      <div class="kpi-card success">
+        <div class="kpi-label">Revenue Today</div>
+        <div class="kpi-value">EGP 82K</div>
+        <div class="kpi-delta up">↑ 8.4% vs yesterday</div>
+        <div class="kpi-sub">After discounts &amp; returns</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-label">Pending Orders</div>
+        <div class="kpi-value">34</div>
+        <div class="kpi-delta down">↑ 3 since last hour</div>
+        <div class="kpi-sub">Awaiting processing</div>
+      </div>
+      <div class="kpi-card danger">
+        <div class="kpi-label">Cancelled Today</div>
+        <div class="kpi-value">9</div>
+        <div class="kpi-delta down">↑ 2 vs yesterday</div>
+        <div class="kpi-sub">6.1% cancellation rate</div>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="orders-table">
+      <div class="table-toolbar">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterAdmin(this,'all')">All (147)</button>
+          <button class="filter-tab" onclick="filterAdmin(this,'pending')">Pending (34)</button>
+          <button class="filter-tab" onclick="filterAdmin(this,'processing')">Processing (61)</button>
+          <button class="filter-tab" onclick="filterAdmin(this,'shipped')">Shipped (43)</button>
+          <button class="filter-tab" onclick="filterAdmin(this,'cancelled')">Cancelled (9)</button>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <input class="form-input" type="text" placeholder="Search order #, customer…" style="width:240px;padding:8px 12px;font-size:12px;"/>
+          <select class="form-select" style="padding:8px 12px;font-size:12px;width:auto;">
+            <option>Newest First</option>
+            <option>Oldest First</option>
+            <option>Highest Value</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" style="accent-color:var(--brown);"/></th>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr data-status="processing">
+              <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+              <td><a href="../order-detail.html" class="order-id">#FA-2025-04872</a></td>
+              <td><div class="customer-cell"><div class="customer-avatar">SM</div><div><div style="font-weight:600;">Sarah Mohamed</div><div style="font-size:11px;color:var(--stone);">sara@example.com</div></div></div></td>
+              <td style="color:var(--stone);">3 items</td>
+              <td style="font-family:'Anton',sans-serif;font-size:15px;">EGP 5,774</td>
+              <td><span class="status-badge status-processing"><span class="status-dot"></span>Processing</span></td>
+              <td style="color:var(--stone);font-size:12px;">25 Apr 2025, 14:32</td>
+              <td><div class="action-btns"><button class="mini-btn primary" onclick="alert('Mark as Shipped (demo only)')">Ship</button><button class="mini-btn" onclick="alert('View order details')">View</button></div></td>
+            </tr>
+            <tr data-status="shipped">
+              <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+              <td><a href="../order-detail.html" class="order-id">#FA-2025-04871</a></td>
+              <td><div class="customer-cell"><div class="customer-avatar">KA</div><div><div style="font-weight:600;">Karim Ali</div><div style="font-size:11px;color:var(--stone);">karim@example.com</div></div></div></td>
+              <td style="color:var(--stone);">1 item</td>
+              <td style="font-family:'Anton',sans-serif;font-size:15px;">EGP 1,890</td>
+              <td><span class="status-badge status-shipped"><span class="status-dot"></span>Shipped</span></td>
+              <td style="color:var(--stone);font-size:12px;">25 Apr 2025, 13:51</td>
+              <td><div class="action-btns"><button class="mini-btn" onclick="alert('Track shipment (demo only)')">Track</button><button class="mini-btn" onclick="alert('View order')">View</button></div></td>
+            </tr>
+            <tr data-status="pending">
+              <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+              <td><a href="../order-detail.html" class="order-id">#FA-2025-04870</a></td>
+              <td><div class="customer-cell"><div class="customer-avatar">NM</div><div><div style="font-weight:600;">Nour Mahmoud</div><div style="font-size:11px;color:var(--stone);">nour@example.com</div></div></div></td>
+              <td style="color:var(--stone);">2 items</td>
+              <td style="font-family:'Anton',sans-serif;font-size:15px;">EGP 3,380</td>
+              <td><span class="status-badge status-pending"><span class="status-dot"></span>Pending</span></td>
+              <td style="color:var(--stone);font-size:12px;">25 Apr 2025, 12:18</td>
+              <td><div class="action-btns"><button class="mini-btn primary" onclick="alert('Confirm order (demo only)')">Confirm</button><button class="mini-btn" onclick="alert('View order')">View</button></div></td>
+            </tr>
+            <tr data-status="processing">
+              <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+              <td><a href="../order-detail.html" class="order-id">#FA-2025-04869</a></td>
+              <td><div class="customer-cell"><div class="customer-avatar">LH</div><div><div style="font-weight:600;">Layla Hassan</div><div style="font-size:11px;color:var(--stone);">layla@example.com</div></div></div></td>
+              <td style="color:var(--stone);">4 items</td>
+              <td style="font-family:'Anton',sans-serif;font-size:15px;">EGP 9,160</td>
+              <td><span class="status-badge status-processing"><span class="status-dot"></span>Processing</span></td>
+              <td style="color:var(--stone);font-size:12px;">25 Apr 2025, 11:05</td>
+              <td><div class="action-btns"><button class="mini-btn primary">Ship</button><button class="mini-btn">View</button></div></td>
+            </tr>
+            <tr data-status="cancelled">
+              <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+              <td><a href="../order-detail.html" class="order-id">#FA-2025-04868</a></td>
+              <td><div class="customer-cell"><div class="customer-avatar">OA</div><div><div style="font-weight:600;">Omar Ashraf</div><div style="font-size:11px;color:var(--stone);">omar@example.com</div></div></div></td>
+              <td style="color:var(--stone);">1 item</td>
+              <td style="font-family:'Anton',sans-serif;font-size:15px;text-decoration:line-through;color:var(--pebble);">EGP 2,490</td>
+              <td><span class="status-badge status-cancelled"><span class="status-dot"></span>Cancelled</span></td>
+              <td style="color:var(--stone);font-size:12px;">25 Apr 2025, 09:44</td>
+              <td><div class="action-btns"><button class="mini-btn" onclick="alert('View order')">View</button></div></td>
+            </tr>
+            <tr data-status="shipped">
+              <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+              <td><a href="../order-detail.html" class="order-id">#FA-2025-04867</a></td>
+              <td><div class="customer-cell"><div class="customer-avatar">RM</div><div><div style="font-weight:600;">Rania Mostafa</div><div style="font-size:11px;color:var(--stone);">rania@example.com</div></div></div></td>
+              <td style="color:var(--stone);">2 items</td>
+              <td style="font-family:'Anton',sans-serif;font-size:15px;">EGP 4,380</td>
+              <td><span class="status-badge status-shipped"><span class="status-dot"></span>Shipped</span></td>
+              <td style="color:var(--stone);font-size:12px;">24 Apr 2025, 18:22</td>
+              <td><div class="action-btns"><button class="mini-btn">Track</button><button class="mini-btn">View</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" style="padding:0 20px;">
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span style="font-size:12px;color:var(--stone);padding:0 12px;">…</span>
+        <button class="page-btn">15</button>
+        <button class="page-btn arrow">›</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../api.js"></script>
+<script src="../components.js"></script>
+<script>
+if (!FashionAPI.requireAuth(true)) { /* redirecting */ }
+
+// Sign out link
+document.querySelector('a[href="login.html"]').onclick = (e) => { e.preventDefault(); FashionAPI.logout(); };
+
+let allOrders = [];
+let currentFilter = 'all';
+
+async function init() {
+  await Promise.all([loadStats(), loadOrders()]);
+}
+
+async function loadStats() {
+  try {
+    const stats = await FashionAPI.get('/admin/stats');
+    const kpiCards = document.querySelectorAll('.kpi-card');
+    if (kpiCards[0]) { kpiCards[0].querySelector('.kpi-value').textContent = stats.totalOrders || 0; kpiCards[0].querySelector('.kpi-sub').textContent = 'Total orders in system'; }
+    if (kpiCards[1]) { const rev = stats.revenue||0; kpiCards[1].querySelector('.kpi-value').textContent = rev >= 1000 ? 'EGP ' + (rev/1000).toFixed(0) + 'K' : FashionAPI.fmt(rev); }
+    if (kpiCards[2]) { kpiCards[2].querySelector('.kpi-value').textContent = stats.pendingOrders || 0; }
+    if (kpiCards[3]) { kpiCards[3].querySelector('.kpi-value').textContent = stats.lowStock || 0; kpiCards[3].querySelector('.kpi-label').textContent = 'Low Stock Products'; }
+  } catch(e) {}
+}
+
+async function loadOrders() {
+  try {
+    const data = await FashionAPI.get('/admin/orders?limit=50');
+    allOrders = data.orders || [];
+    renderOrders();
+    updateFilterCounts();
+  } catch(e) {
+    document.getElementById('orders-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--danger);">Could not load orders.</td></tr>';
+  }
+}
+
+function updateFilterCounts() {
+  const counts = { all: allOrders.length, pending: 0, processing: 0, shipped: 0, cancelled: 0 };
+  allOrders.forEach(o => { if (counts[o.status] !== undefined) counts[o.status]++; });
+  const tabs = document.querySelectorAll('.filter-tab');
+  if (tabs[0]) tabs[0].textContent = `All (${counts.all})`;
+  if (tabs[1]) tabs[1].textContent = `Pending (${counts.pending})`;
+  if (tabs[2]) tabs[2].textContent = `Processing (${counts.processing})`;
+  if (tabs[3]) tabs[3].textContent = `Shipped (${counts.shipped})`;
+  if (tabs[4]) tabs[4].textContent = `Cancelled (${counts.cancelled})`;
+}
+
+function renderOrders() {
+  const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+  const tbody = document.getElementById('orders-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--stone);">No orders found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(o => {
+    const nextStatus = { pending: 'processing', processing: 'shipped', shipped: 'delivered' }[o.status];
+    const nextLabel = { pending: 'Confirm', processing: 'Ship', shipped: 'Deliver' }[o.status] || '';
+    const initials = FashionAPI.initials(o.customer_name || '?');
+    return `<tr data-status="${o.status}">
+      <td><input type="checkbox" style="accent-color:var(--brown);"/></td>
+      <td><a href="../order-detail.html?id=${o.id}" class="order-id">${o.order_number}</a></td>
+      <td><div class="customer-cell"><div class="customer-avatar">${initials}</div><div><div style="font-weight:600;">${o.customer_name||'—'}</div><div style="font-size:11px;color:var(--stone);">${o.customer_email||''}</div></div></div></td>
+      <td style="color:var(--stone);">Order</td>
+      <td style="font-family:'Anton',sans-serif;font-size:15px;">${FashionAPI.fmt(o.total)}</td>
+      <td>${FashionAPI.statusBadge(o.status)}</td>
+      <td style="color:var(--stone);font-size:12px;">${FashionAPI.fmtDate(o.created_at)}</td>
+      <td><div class="action-btns">
+        ${nextLabel ? `<button class="mini-btn primary" onclick="updateStatus(${o.id},'${nextStatus}')">${nextLabel}</button>` : ''}
+        <a href="../order-detail.html?id=${o.id}" class="mini-btn">View</a>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function updateStatus(orderId, status) {
+  try {
+    await FashionAPI.put('/orders/' + orderId + '/status', { status });
+    await loadOrders();
+    window.fashionAI?.toast('Order status updated', 'success');
+  } catch(e) { window.fashionAI?.toast(e.message, 'error'); }
+}
+
+function filterAdmin(btn, status) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = status;
+  renderOrders();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Edit Product — FashionAI Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="../style.css"/>
+<style>
+.edit-layout { display: grid; grid-template-columns: 1fr 360px; gap: 2px; align-items: start; }
+.edit-main { display: flex; flex-direction: column; gap: 2px; }
+.edit-card { background: var(--white); padding: 36px; }
+.edit-card-title { font-size: 10px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--stone); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--fog); display: flex; align-items: center; gap: 12px; }
+.edit-card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--brown); }
+.upload-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+.img-slot { aspect-ratio: 3/4; background: var(--cream); border: 2px dashed var(--fog); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: none; transition: border-color .2s, background .2s; position: relative; overflow: hidden; }
+.img-slot:hover { border-color: var(--brown); background: rgba(110,99,83,.04); }
+.img-slot.filled { border-style: solid; border-color: var(--fog); }
+.img-slot img { width: 100%; height: 100%; object-fit: cover; }
+.img-slot .img-actions { position: absolute; inset: 0; background: rgba(46,46,46,.6); display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0; transition: opacity .2s; }
+.img-slot:hover .img-actions { opacity: 1; }
+.img-action-btn { background: var(--white); border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink); transition: background .2s; }
+.img-action-btn:hover { background: var(--fog); }
+.img-slot .main-badge { position: absolute; top: 8px; left: 8px; font-size: 8px; font-weight: 700; letter-spacing: .15em; background: var(--brown); color: var(--white); padding: 3px 8px; text-transform: uppercase; }
+.img-slot-hint { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--stone); margin-top: 6px; }
+.variant-row { display: grid; grid-template-columns: 1fr auto auto 40px; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--fog); }
+.variant-row:last-of-type { border-bottom: none; }
+.size-chip-set { display: flex; flex-wrap: wrap; gap: 6px; }
+.size-chip { padding: 6px 14px; border: 1px solid var(--fog); font-size: 11px; font-weight: 700; color: var(--stone); cursor: none; transition: all .15s; }
+.size-chip.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.size-chip.low { background: rgba(243,156,18,.1); border-color: rgba(243,156,18,.4); color: #b07d0a; }
+.color-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--fog); }
+.color-swatch-edit { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--fog); flex-shrink: 0; }
+.toggle-wrap { display: flex; align-items: center; gap: 12px; }
+.toggle-label { font-size: 13px; color: var(--ink); }
+.toggle-sub { font-size: 11px; color: var(--stone); }
+.sidebar-card { background: var(--white); padding: 28px; margin-bottom: 2px; }
+.sidebar-card-title { font-size: 10px; font-weight: 700; letter-spacing: .25em; text-transform: uppercase; color: var(--stone); margin-bottom: 18px; }
+.status-toggle { display: flex; gap: 0; }
+.status-opt { flex: 1; padding: 10px; border: 1px solid var(--fog); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--stone); text-align: center; cursor: none; transition: all .15s; background: none; }
+.status-opt + .status-opt { border-left: none; }
+.status-opt.active.published { background: rgba(39,174,96,.1); border-color: var(--success); color: var(--success); }
+.status-opt.active.draft { background: rgba(162,160,146,.15); border-color: var(--stone); color: var(--stone); }
+.status-opt.active.hidden { background: rgba(192,57,43,.1); border-color: var(--danger); color: var(--danger); }
+.char-counter { font-size: 11px; color: var(--pebble); text-align: right; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div style="padding:24px 20px 32px;">
+      <a href="../index.html" style="font-family:'Anton',sans-serif;font-size:18px;color:var(--white);letter-spacing:.05em;display:block;margin-bottom:4px;">FASHIONAI</a>
+      <div style="font-size:9px;color:var(--pebble);letter-spacing:.2em;text-transform:uppercase;">Admin Panel</div>
+    </div>
+    <nav>
+      <a href="index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Orders
+      </a>
+      <a href="products.html" class="admin-nav-link active">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Products
+      </a>
+      <a href="inventory.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Inventory
+      </a>
+      <a href="analytics.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a href="users.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="../index.html" class="admin-nav-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        View Storefront
+      </a>
+      <div style="height:1px;background:rgba(255,255,255,.08);margin:16px 20px;"></div>
+      <a href="login.html" class="admin-nav-link" style="color:var(--stone);">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <!-- Top bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--fog);">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--stone);margin-bottom:8px;">
+          <a href="products.html" style="color:var(--stone);transition:color .15s;" onmouseover="this.style.color='var(--brown)'" onmouseout="this.style.color='var(--stone)'">Products</a>
+          <span>›</span>
+          <span style="color:var(--ink);">Oversized Linen Blazer</span>
+        </div>
+        <h1 style="font-family:'Anton',sans-serif;font-size:30px;letter-spacing:-.02em;color:var(--ink);">EDIT PRODUCT</h1>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <a href="../product.html" target="_blank" class="btn btn-ghost btn-sm" style="gap:6px;">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Preview
+        </a>
+        <button class="btn btn-ghost btn-sm" onclick="alert('Draft saved')">Save Draft</button>
+        <button class="btn btn-primary btn-sm" onclick="saveProduct()">Publish Changes</button>
+      </div>
+    </div>
+
+    <div class="edit-layout">
+      <!-- Left: Main content -->
+      <div class="edit-main">
+
+        <!-- Basic Info -->
+        <div class="edit-card">
+          <div class="edit-card-title">Product Information</div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div class="form-group">
+              <label class="form-label">Product Name <span style="color:var(--danger);">*</span></label>
+              <input class="form-input" type="text" id="prod-name" value="Oversized Linen Blazer" oninput="updateCounter('prod-name','nc-name',80)"/>
+              <div class="char-counter"><span id="nc-name">21</span>/80</div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Brand / Collection</label>
+                <select class="form-select" id="prod-brand">
+                  <option selected>Studio Collection</option>
+                  <option>Create Essentials</option>
+                  <option>Create Premium</option>
+                  <option>Capsule Line</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">SKU <span style="color:var(--danger);">*</span></label>
+                <input class="form-input" type="text" value="CBS-LNB-001"/>
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="prod-cat">
+                  <option>Women → Blazers & Jackets</option>
+                  <option>Women → Dresses</option>
+                  <option>Women → Tops</option>
+                  <option>Women → Bottoms</option>
+                  <option>Men → Tops</option>
+                  <option>Men → Bottoms</option>
+                  <option>Kids</option>
+                  <option>Accessories</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subcategory</label>
+                <select class="form-select">
+                  <option selected>Blazers</option>
+                  <option>Jackets</option>
+                  <option>Outerwear</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Short Description <span style="color:var(--danger);">*</span></label>
+              <textarea class="form-input" rows="3" id="prod-desc" oninput="updateCounter('prod-desc','nc-desc',200)" style="resize:none;">A relaxed, oversized blazer crafted from 100% washed linen. Featuring a dropped shoulder, single-button closure, and patch pockets — essential for elevated casual dressing.</textarea>
+              <div class="char-counter"><span id="nc-desc">160</span>/200</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Full Description</label>
+              <textarea class="form-input" rows="6" style="resize:vertical;">Washed 100% linen for a soft, lived-in feel from the first wear. The oversized silhouette is intentional — designed to layer over everything from slip dresses to wide-leg trousers.
+
+Key details:
+— Single-button closure
+— Patch chest pocket + two front pockets
+— Unlined for breathability
+— Machine washable
+— Model is 175cm and wears a size S</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tags</label>
+              <input class="form-input" type="text" value="linen, blazer, oversized, summer, workwear, neutral" placeholder="Separate with commas…"/>
+              <div class="form-hint">Tags help customers find this product via search.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Images -->
+        <div class="edit-card">
+          <div class="edit-card-title">Product Images</div>
+          <div class="upload-grid">
+            <div class="img-slot filled">
+              <span class="main-badge">Main</span>
+              <img src="https://placehold.co/200x267/d1d0cb/6e6353?text=Front" alt=""/>
+              <div class="img-actions">
+                <button class="img-action-btn" title="Set as main" onclick="alert('Set as main (demo)')">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </button>
+                <button class="img-action-btn" title="Delete" onclick="alert('Delete image (demo)')">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="img-slot filled">
+              <img src="https://placehold.co/200x267/a2a092/2e2e2e?text=Back" alt=""/>
+              <div class="img-actions">
+                <button class="img-action-btn" onclick="alert('Set as main (demo)')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                <button class="img-action-btn" onclick="alert('Delete (demo)')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+              </div>
+            </div>
+            <div class="img-slot filled">
+              <img src="https://placehold.co/200x267/8a887e/fafaf8?text=Detail" alt=""/>
+              <div class="img-actions">
+                <button class="img-action-btn" onclick="alert('Set as main (demo)')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+                <button class="img-action-btn" onclick="alert('Delete (demo)')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+              </div>
+            </div>
+            <div class="img-slot" onclick="alert('Upload new image (demo)')">
+              <svg width="24" height="24" fill="none" stroke="var(--pebble)" stroke-width="1.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <div class="img-slot-hint">Add Image</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--stone);margin-top:12px;">Drag to reorder. First image is the main product photo. Recommended: 800×1067px, JPG or PNG, max 5MB.</div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="edit-card">
+          <div class="edit-card-title">Pricing</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Base Price (EGP) <span style="color:var(--danger);">*</span></label>
+              <input class="form-input" type="number" id="prod-price" value="2490" min="0" step="10"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sale Price (EGP)</label>
+              <input class="form-input" type="number" id="prod-sale-price" placeholder="Leave empty if no sale" min="0" step="10"/>
+              <div class="form-hint">Leave blank for no discount.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cost Price (EGP)</label>
+              <input class="form-input" type="number" value="890" min="0" step="10"/>
+              <div class="form-hint">Not shown to customers.</div>
+            </div>
+          </div>
+          <div style="background:var(--cream);padding:16px 20px;margin-top:16px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:4px;">Margin</div>
+              <div style="font-family:'Anton',sans-serif;font-size:22px;color:var(--ink);">EGP 1,600</div>
+              <div style="font-size:11px;color:var(--success);margin-top:2px;">64.3% margin</div>
+            </div>
+            <div style="width:1px;height:40px;background:var(--fog);"></div>
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:4px;">VAT (14%)</div>
+              <div style="font-family:'Anton',sans-serif;font-size:22px;color:var(--ink);">EGP 348.6</div>
+              <div style="font-size:11px;color:var(--stone);margin-top:2px;">Included in price</div>
+            </div>
+            <div style="width:1px;height:40px;background:var(--fog);"></div>
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:4px;">Price ex-VAT</div>
+              <div style="font-family:'Anton',sans-serif;font-size:22px;color:var(--ink);">EGP 2,183</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Variants -->
+        <div class="edit-card">
+          <div class="edit-card-title">Sizes & Stock</div>
+          <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-bottom:12px;">Available Sizes</div>
+            <div class="size-chip-set" id="size-chips">
+              <button class="size-chip on" onclick="toggleSize(this)">XS</button>
+              <button class="size-chip on" onclick="toggleSize(this)">S</button>
+              <button class="size-chip on" onclick="toggleSize(this)">M</button>
+              <button class="size-chip on" onclick="toggleSize(this)">L</button>
+              <button class="size-chip on" onclick="toggleSize(this)">XL</button>
+              <button class="size-chip" onclick="toggleSize(this)">XXL</button>
+              <button class="size-chip" onclick="toggleSize(this)">3XL</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);padding:10px 0;border-bottom:1px solid var(--fog);">Size</th>
+                  <th style="text-align:center;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);padding:10px 0;border-bottom:1px solid var(--fog);">Stock</th>
+                  <th style="text-align:center;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);padding:10px 0;border-bottom:1px solid var(--fog);">Low Stock Alert</th>
+                  <th style="text-align:center;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);padding:10px 0;border-bottom:1px solid var(--fog);">SKU Suffix</th>
+                  <th style="text-align:center;font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);padding:10px 0;border-bottom:1px solid var(--fog);">Price Override</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="variant-row" style="display:table-row;">
+                  <td style="padding:12px 0;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--ink);">XS</td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="8" style="width:80px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="3" style="width:60px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="text" value="-XS" style="width:70px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" placeholder="—" style="width:100px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                </tr>
+                <tr class="variant-row" style="display:table-row;">
+                  <td style="padding:12px 0;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--ink);">S</td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="14" style="width:80px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="5" style="width:60px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="text" value="-S" style="width:70px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" placeholder="—" style="width:100px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                </tr>
+                <tr class="variant-row" style="display:table-row;">
+                  <td style="padding:12px 0;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--ink);">M</td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="21" style="width:80px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="5" style="width:60px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="text" value="-M" style="width:70px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" placeholder="—" style="width:100px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                </tr>
+                <tr class="variant-row" style="display:table-row;">
+                  <td style="padding:12px 0;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--ink);">L</td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="4" style="width:80px;padding:8px;text-align:center;margin:0 auto;display:block;" class="low-stock"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="5" style="width:60px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="text" value="-L" style="width:70px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" placeholder="—" style="width:100px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                </tr>
+                <tr class="variant-row" style="display:table-row;">
+                  <td style="padding:12px 0;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--ink);">XL</td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="9" style="width:80px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" value="5" style="width:60px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="text" value="-XL" style="width:70px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                  <td style="padding:12px 8px;text-align:center;"><input class="form-input" type="number" placeholder="—" style="width:100px;padding:8px;text-align:center;margin:0 auto;display:block;"/></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:32px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);margin-bottom:12px;">Colors / Colorways</div>
+            <div id="color-list">
+              <div class="color-row">
+                <div class="color-swatch-edit" style="background:#D1D0CB;"></div>
+                <input class="form-input" type="text" value="Stone Beige" style="flex:1;padding:8px 12px;font-size:13px;"/>
+                <input type="color" value="#D1D0CB" style="width:36px;height:36px;border:1px solid var(--fog);padding:2px;cursor:none;background:var(--white);"/>
+                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--stone);padding:4px;transition:color .15s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--stone)'">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="color-row">
+                <div class="color-swatch-edit" style="background:#2E2E2E;"></div>
+                <input class="form-input" type="text" value="Ink Black" style="flex:1;padding:8px 12px;font-size:13px;"/>
+                <input type="color" value="#2E2E2E" style="width:36px;height:36px;border:1px solid var(--fog);padding:2px;cursor:none;background:var(--white);"/>
+                <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--stone);padding:4px;transition:color .15s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--stone)'">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:12px;gap:6px;" onclick="addColor()">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Color
+            </button>
+          </div>
+        </div>
+
+        <!-- SEO -->
+        <div class="edit-card">
+          <div class="edit-card-title">SEO & Search</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">SEO Title</label>
+              <input class="form-input" type="text" id="seo-title" value="Oversized Linen Blazer — Studio Collection | FashionAI" oninput="updateCounter('seo-title','nc-seo',60)"/>
+              <div class="char-counter"><span id="nc-seo">54</span>/60</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Meta Description</label>
+              <textarea class="form-input" rows="3" id="seo-desc" oninput="updateCounter('seo-desc','nc-meta',160)" style="resize:none;">Shop the Oversized Linen Blazer from our Studio Collection. 100% washed linen, relaxed fit. Free delivery in Egypt.</textarea>
+              <div class="char-counter"><span id="nc-meta">112</span>/160</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL Slug</label>
+              <div style="display:flex;align-items:center;gap:0;">
+                <span style="background:var(--cream);border:1px solid var(--fog);border-right:none;padding:13px 16px;font-size:13px;color:var(--stone);white-space:nowrap;">fashionai.eg/products/</span>
+                <input class="form-input" type="text" value="oversized-linen-blazer" style="border-radius:0;"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Sidebar -->
+      <div style="display:flex;flex-direction:column;gap:2px;position:sticky;top:calc(var(--nav-h) + 24px);">
+        <!-- Status -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Publish Status</div>
+          <div class="status-toggle" id="status-toggle">
+            <button class="status-opt active published" onclick="setStatus(this,'published')">Published</button>
+            <button class="status-opt draft" onclick="setStatus(this,'draft')">Draft</button>
+            <button class="status-opt hidden" onclick="setStatus(this,'hidden')">Hidden</button>
+          </div>
+          <div style="font-size:11px;color:var(--stone);margin-top:10px;">Published items are visible in the catalog and search.</div>
+        </div>
+
+        <!-- Toggles -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Product Flags</div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div class="notif-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--fog);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Featured</div><div style="font-size:11px;color:var(--stone);">Show on homepage</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="notif-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--fog);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);">New Arrival</div><div style="font-size:11px;color:var(--stone);">Show "New" badge</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="notif-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--fog);">
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);">AI Try-On Ready</div><div style="font-size:11px;color:var(--stone);">Enable virtual try-on</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="notif-row" style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;">
+              <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Returnable</div><div style="font-size:11px;color:var(--stone);">Allow returns</div></div>
+              <label class="toggle-switch"><input type="checkbox" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Stock</div>
+          <div class="form-group">
+            <label class="form-label">Total Stock Units</label>
+            <input class="form-input" type="number" id="prod-stock" value="48" min="0"/>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Performance</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--stone);">Total Sales</span>
+              <span style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">248</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--stone);">Revenue</span>
+              <span style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">EGP 617K</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--stone);">Avg. Rating</span>
+              <span style="font-family:'Anton',sans-serif;font-size:18px;color:var(--brown);">4.8 ★</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--stone);">Page Views (30d)</span>
+              <span style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">4,291</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--stone);">Conversion Rate</span>
+              <span style="font-size:14px;font-weight:700;color:var(--success);">5.8%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--stone);">Wishlist Count</span>
+              <span style="font-family:'Anton',sans-serif;font-size:18px;color:var(--ink);">184</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Schedule</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="form-group">
+              <label class="form-label">Publish Date</label>
+              <input class="form-input" type="datetime-local" value="2025-04-25T09:00" style="font-size:13px;"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sale End Date</label>
+              <input class="form-input" type="datetime-local" placeholder="No sale scheduled" style="font-size:13px;"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="sidebar-card" style="border-top:2px solid var(--danger);">
+          <div class="sidebar-card-title" style="color:var(--danger);">Danger Zone</div>
+          <button class="btn btn-danger btn-sm btn-full" style="margin-bottom:8px;" onclick="if(confirm('Archive this product? It will be hidden from the catalog but all data is preserved.')) alert('Product archived (demo)')">Archive Product</button>
+          <button style="width:100%;padding:10px;border:1px solid rgba(192,57,43,.3);background:none;color:var(--danger);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:none;transition:background .15s;" onmouseover="this.style.background='rgba(192,57,43,.08)'" onmouseout="this.style.background='none'" onclick="if(confirm('Permanently delete this product? This cannot be undone.')) alert('Delete blocked in demo mode.')">Delete Permanently</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Save Bar -->
+    <div style="margin-top:2px;background:var(--ink);padding:20px 32px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:12px;color:var(--stone);">Last saved: Today at 14:32</div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost dark btn-sm">Discard Changes</button>
+        <button class="btn btn-ghost dark btn-sm" onclick="alert('Draft saved')">Save Draft</button>
+        <button class="btn btn-primary btn-sm" style="background:var(--brown);" onclick="saveProduct()">
+          Publish Changes
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../api.js"></script>
+<script src="../components.js"></script>
+<script>
+if (!FashionAPI.requireAuth(true)) { /* redirecting */ }
+document.querySelector('a[href="login.html"]').onclick = (e) => { e.preventDefault(); FashionAPI.logout(); };
+
+const params = new URLSearchParams(location.search);
+const productId = params.get('id');
+
+async function loadProduct() {
+  if (!productId) return;
+  try {
+    const p = await FashionAPI.get('/products/' + productId);
+    document.title = 'Edit: ' + p.name + ' — FashionAI Admin';
+    const nameEl = document.getElementById('prod-name');
+    if (nameEl) nameEl.value = p.name;
+    const brandEl = document.getElementById('prod-brand');
+    if (brandEl) brandEl.value = p.brand;
+    const catEl = document.getElementById('prod-cat');
+    if (catEl) catEl.value = p.category;
+    const priceEl = document.getElementById('prod-price');
+    if (priceEl) priceEl.value = p.price;
+    const salePriceEl = document.getElementById('prod-sale-price');
+    if (salePriceEl) salePriceEl.value = p.sale_price || '';
+    const descEl = document.getElementById('prod-desc');
+    if (descEl) descEl.value = p.description || '';
+    const stockEl = document.getElementById('prod-stock');
+    if (stockEl) stockEl.value = p.stock;
+    const h1 = document.querySelector('h1');
+    if (h1) h1.textContent = p.name.toUpperCase();
+  } catch(e) { window.fashionAI?.toast('Could not load product', 'error'); }
+}
+
+async function saveProduct() {
+  const name = document.getElementById('prod-name')?.value?.trim();
+  const brand = document.getElementById('prod-brand')?.value;
+  const category = document.getElementById('prod-cat')?.value;
+  const price = parseFloat(document.getElementById('prod-price')?.value);
+  const sale_price = document.getElementById('prod-sale-price')?.value ? parseFloat(document.getElementById('prod-sale-price').value) : null;
+  const description = document.getElementById('prod-desc')?.value;
+  const stock = parseInt(document.getElementById('prod-stock')?.value) || 0;
+  if (!name || isNaN(price)) { window.fashionAI?.toast('Name and price are required', 'error'); return; }
+  try {
+    if (productId) {
+      await FashionAPI.put('/products/' + productId, { name, brand, category, price, sale_price, description, stock });
+      window.fashionAI?.toast('Product updated', 'success');
+    } else {
+      await FashionAPI.post('/products', { name, brand, category, price, sale_price, description, stock });
+      window.fashionAI?.toast('Product created', 'success');
+      setTimeout(() => location.href = 'products.html', 1000);
+    }
+  } catch(e) { window.fashionAI?.toast(e.message, 'error'); }
+}
+
+function toggleSize(btn) { btn.classList.toggle('on'); }
+
+function setStatus(btn, type) {
+  document.querySelectorAll('.status-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function addColor() {
+  const row = document.createElement('div');
+  row.className = 'color-row';
+  row.innerHTML = `
+    <div class="color-swatch-edit" style="background:#ccc;"></div>
+    <input class="form-input" type="text" placeholder="Color name…" style="flex:1;padding:8px 12px;font-size:13px;"/>
+    <input type="color" value="#cccccc" style="width:36px;height:36px;border:1px solid var(--fog);padding:2px;background:var(--white);" oninput="this.previousElementSibling.previousElementSibling.style.background=this.value"/>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--stone);padding:4px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  document.getElementById('color-list').appendChild(row);
+}
+
+function updateCounter(inputId, counterId, max) {
+  const el = document.getElementById(inputId);
+  const counter = document.getElementById(counterId);
+  if (!el || !counter) return;
+  const val = el.value.length;
+  counter.textContent = val;
+  counter.style.color = val > max * 0.9 ? 'var(--danger)' : 'var(--pebble)';
+}
+
+loadProduct();
+</script>
+</body>
+</html>
