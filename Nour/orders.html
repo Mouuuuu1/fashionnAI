@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Orders — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.orders-page { margin-top: var(--nav-h); padding: 60px; min-height: calc(100vh - var(--nav-h)); background: var(--cream); }
+.orders-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+.orders-list { display: flex; flex-direction: column; gap: 2px; }
+.order-row { background: var(--white); padding: 28px 32px; display: grid; grid-template-columns: 160px 1fr auto; gap: 32px; align-items: center; transition: box-shadow .2s; }
+.order-row:hover { box-shadow: 0 4px 24px rgba(46,46,46,.06); }
+.order-num-label { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--stone); margin-bottom: 6px; }
+.order-num-val { font-family: 'Anton', sans-serif; font-size: 18px; letter-spacing: .04em; color: var(--ink); }
+.order-date { font-size: 11px; color: var(--stone); margin-top: 4px; }
+.order-items-preview { display: flex; gap: 8px; align-items: center; }
+.order-item-thumb { width: 52px; height: 70px; overflow: hidden; background: var(--cream); }
+.order-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.order-more { width: 52px; height: 70px; background: var(--fog); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--stone); }
+.order-meta { display: flex; flex-direction: column; gap: 4px; margin-left: 16px; }
+.order-total { font-family: 'Anton', sans-serif; font-size: 20px; color: var(--ink); }
+.order-items-count { font-size: 11px; color: var(--stone); }
+.order-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+</style>
+</head>
+<body>
+<div class="orders-page">
+  <div style="max-width:1000px;margin:0 auto;">
+    <div class="orders-header">
+      <div>
+        <h1 style="font-family:'Anton',sans-serif;font-size:48px;letter-spacing:-.02em;color:var(--ink);">MY ORDERS</h1>
+        <p style="font-size:13px;color:var(--stone);margin-top:8px;" id="orders-subtitle">Loading…</p>
+      </div>
+      <div class="tabs" style="border-bottom:none;margin-bottom:0;">
+        <button class="tab active" onclick="filterOrders(this,'all')">All</button>
+        <button class="tab" onclick="filterOrders(this,'active')">Active</button>
+        <button class="tab" onclick="filterOrders(this,'delivered')">Delivered</button>
+        <button class="tab" onclick="filterOrders(this,'cancelled')">Cancelled</button>
+      </div>
+    </div>
+
+    <div class="orders-list" id="orders-list"><div style="text-align:center;padding:80px;color:var(--stone);font-size:13px;letter-spacing:.1em;text-transform:uppercase;">Loading orders…</div></div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="orders-pagination"></div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+if (!FashionAPI.requireAuth()) { /* redirecting */ }
+
+let allOrders = [];
+let currentFilter = 'all';
+let currentPage = 1;
+
+async function loadOrders() {
+  if (!FashionAPI.isLoggedIn()) return;
+  try {
+    const data = await FashionAPI.get('/orders?limit=50');
+    allOrders = data.orders;
+    document.getElementById('orders-subtitle').textContent = data.total + ' order' + (data.total!==1?'s':'') + ' total';
+    renderOrders();
+  } catch(e) {
+    document.getElementById('orders-list').innerHTML = '<p style="color:var(--danger);padding:40px;text-align:center;">Could not load orders.</p>';
+  }
+}
+
+function renderOrders() {
+  const list = document.getElementById('orders-list');
+  const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => {
+    if (currentFilter === 'active') return ['pending','processing','shipped'].includes(o.status);
+    if (currentFilter === 'delivered') return o.status === 'delivered';
+    if (currentFilter === 'cancelled') return o.status === 'cancelled';
+    return true;
+  });
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:80px;color:var(--stone);">No orders found.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(order => {
+    const addr = order.shipping_address || {};
+    const thumbs = order.items.slice(0,2).map(i =>
+      `<div class="order-item-thumb"><img src="${i.image || 'https://placehold.co/104x140/d1d0cb/6e6353?text='}" alt="${i.name}"/></div>`
+    ).join('') + (order.items.length > 2 ? `<div class="order-more">+${order.items.length-2}</div>` : '');
+    const firstName = order.items[0]?.name || 'Order';
+    const moreCount = order.items.length > 1 ? ` + ${order.items.length-1} more` : '';
+    const canReview = order.status === 'delivered';
+    const actionLink = ['pending','processing'].includes(order.status)
+      ? `<a href="order-detail.html?id=${order.id}" class="btn btn-ghost btn-sm">View Details</a>`
+      : order.status === 'shipped'
+      ? `<a href="order-detail.html?id=${order.id}" class="btn btn-ghost btn-sm">Track Shipment</a>`
+      : `<a href="order-detail.html?id=${order.id}" class="btn btn-ghost btn-sm">View Details</a>`;
+    return `<div class="order-row">
+      <div><div class="order-num-label">Order Number</div><div class="order-num-val">${order.order_number}</div><div class="order-date">${FashionAPI.fmtDate(order.created_at)}</div></div>
+      <div style="display:flex;align-items:center;">
+        <div class="order-items-preview">${thumbs}</div>
+        <div class="order-meta">
+          <div style="font-size:13px;font-weight:600;color:var(--ink);">${firstName}${moreCount}</div>
+          <div class="order-total">${FashionAPI.fmt(order.total)}</div>
+        </div>
+      </div>
+      <div class="order-actions">
+        ${FashionAPI.statusBadge(order.status)}
+        ${actionLink}
+        ${canReview ? `<button class="btn btn-brown btn-sm" onclick="window.fashionAI?.toast('Review feature coming soon!')">Write Review</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterOrders(btn, filter) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = filter;
+  renderOrders();
+}
+
+loadOrders();
+</script>
+</body>
+</html>
