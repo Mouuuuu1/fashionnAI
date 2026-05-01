@@ -1,8 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import authRoutes    from './routes/auth.js';
-import productRoutes from './routes/products.js';
-import userRoutes    from './routes/users.js';
+import authRoutes     from './routes/auth.js';
+import productRoutes  from './routes/products.js';
+import userRoutes     from './routes/users.js';
+import cartRoutes     from './routes/cart.js';
+import orderRoutes    from './routes/orders.js';
+import wishlistRoutes from './routes/wishlist.js';
+import adminRoutes    from './routes/admin.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -14,6 +18,10 @@ app.use(express.json());
 app.use('/api/auth',     authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/users',    userRoutes);
+app.use('/api/cart',     cartRoutes);
+app.use('/api/orders',   orderRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/admin',    adminRoutes);
 
 /* ─── Root & Health ──────────────────────────────────────────── */
 app.get('/', (req, res) => {

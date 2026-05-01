@@ -15,7 +15,7 @@ const mime = {
 
 http.createServer((req, res) => {
   const urlPath = req.url.split('?')[0];
-  if (urlPath === '/' || urlPath === '/index.html') { res.writeHead(302, { Location: '/catalog.html' }); res.end(); return; }
+  if (urlPath === '/') { res.writeHead(302, { Location: '/index.html' }); res.end(); return; }
   let filePath = path.join(__dirname, urlPath);
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {

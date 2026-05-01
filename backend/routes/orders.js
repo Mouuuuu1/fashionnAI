@@ -96,23 +96,29 @@ router.post('/', authenticate, (req, res) => {
   });
 
   const order = placeOrder();
-  res.status(201).json(formatOrder(order));
+  res.status(201).json({ order: formatOrder(order) });
 });
 
-/* PUT /api/orders/:id/status (admin) */
-router.put('/:id/status', authenticate, requireAdmin, (req, res) => {
+/* PUT /api/orders/:id/status — admin sets any status; users can only cancel their own pending/processing orders */
+router.put('/:id/status', authenticate, (req, res) => {
   const { status } = req.body;
-  const validStatuses = ['pending','processing','shipped','delivered','cancelled'];
+  const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
   if (!validStatuses.includes(status)) return res.status(400).json({ error: `status must be one of: ${validStatuses.join(', ')}` });
 
-  const order = db.prepare('SELECT id FROM orders WHERE id=?').get(req.params.id);
+  const order = db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);
   if (!order) return res.status(404).json({ error: 'Order not found' });
+
+  if (req.user.role !== 'admin') {
+    if (order.user_id !== req.user.id) return res.status(403).json({ error: 'Access denied' });
+    if (status !== 'cancelled') return res.status(403).json({ error: 'You can only cancel orders' });
+    if (!['pending', 'processing'].includes(order.status)) return res.status(422).json({ error: 'Order cannot be cancelled at this stage' });
+  }
 
   db.prepare("UPDATE orders SET status=?, updated_at=datetime('now') WHERE id=?").run(status, req.params.id);
   res.json(formatOrder(db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id)));
 });
 
-/* GET /api/orders/number/:orderNumber — look up by order number */
+/* GET /api/orders/number/:orderNumber */
 router.get('/number/:orderNumber', authenticate, (req, res) => {
   const order = db.prepare('SELECT * FROM orders WHERE order_number=? AND (user_id=? OR ?=\'admin\')').get(req.params.orderNumber, req.user.id, req.user.role);
   if (!order) return res.status(404).json({ error: 'Order not found' });

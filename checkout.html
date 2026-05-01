@@ -225,7 +225,7 @@ function renderSidebar() {
 
 async function loadAddresses() {
   try {
-    addressData = await FashionAPI.get('/users/me/addresses');
+    addressData = await FashionAPI.get('/users/addresses');
     renderAddresses();
   } catch(e) {}
 }
