@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopping Cart — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.cart-layout { margin-top: var(--nav-h); display: grid; grid-template-columns: 1fr 380px; gap: 0; min-height: calc(100vh - var(--nav-h)); }
+.cart-main { padding: 60px; border-right: 1px solid var(--fog); }
+.cart-sidebar { background: var(--cream); padding: 60px 40px; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+.cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.cart-title { font-family: 'Anton', sans-serif; font-size: 40px; letter-spacing: -.02em; color: var(--ink); }
+.cart-count { font-size: 13px; color: var(--stone); }
+.remove-btn { background: none; border: none; color: var(--pebble); font-size: 11px; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; transition: color .2s; text-decoration: underline; padding: 0; }
+.remove-btn:hover { color: var(--danger); }
+.cart-empty { text-align: center; padding: 100px 40px; }
+.shipping-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.shipping-option { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid var(--fog); background: var(--white); cursor: none; transition: border-color .2s; }
+.shipping-option.selected { border-color: var(--brown); background: rgba(110,99,83,.04); }
+.shipping-option-left { display: flex; align-items: center; gap: 12px; }
+.shipping-option input[type="radio"] { accent-color: var(--brown); }
+.shipping-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.shipping-eta { font-size: 11px; color: var(--stone); margin-top: 2px; }
+.shipping-price { font-size: 13px; font-weight: 700; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="cart-layout">
+  <!-- Cart Items -->
+  <div class="cart-main">
+    <div class="cart-header">
+      <div>
+        <h1 class="cart-title">SHOPPING CART</h1>
+        <div class="cart-count" id="cart-item-count">Loading…</div>
+      </div>
+      <a href="catalog.html" class="btn btn-ghost btn-sm">← Continue Shopping</a>
+    </div>
+
+    <div id="cart-items-container">
+      <div style="text-align:center;padding:80px 0;color:var(--stone);font-size:13px;letter-spacing:.1em;text-transform:uppercase;" id="cart-loading">Loading cart…</div>
+    </div>
+
+    <!-- Shipping -->
+    <div style="margin-top:40px;padding-top:40px;border-top:1px solid var(--fog);">
+      <h3 style="font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);margin-bottom:4px;">Shipping Method</h3>
+      <div class="shipping-options">
+        <div class="shipping-option selected">
+          <div class="shipping-option-left"><input type="radio" name="ship" checked /><div><div class="shipping-name">Standard Delivery</div><div class="shipping-eta">3–5 business days</div></div></div>
+          <span class="shipping-price" style="color:var(--success);">Free</span>
+        </div>
+        <div class="shipping-option">
+          <div class="shipping-option-left"><input type="radio" name="ship" /><div><div class="shipping-name">Express Delivery</div><div class="shipping-eta">1–2 business days</div></div></div>
+          <span class="shipping-price"><span class="egp">EGP</span>49</span>
+        </div>
+        <div class="shipping-option">
+          <div class="shipping-option-left"><input type="radio" name="ship" /><div><div class="shipping-name">Same-Day Delivery</div><div class="shipping-eta">Greater Cairo only</div></div></div>
+          <span class="shipping-price"><span class="egp">EGP</span>99</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="cart-sidebar">
+    <div class="order-summary">
+      <div class="order-summary-title">Order Summary</div>
+      <div class="summary-line"><span id="subtotal-label">Subtotal</span><span id="subtotal-val">—</span></div>
+      <div class="summary-line discount" id="discount-line" style="display:none;"><span id="discount-label">Discount</span><span id="discount-val"></span></div>
+      <div class="summary-line"><span>Shipping</span><span id="shipping-val">—</span></div>
+      <div class="summary-line total"><span>Total</span><span id="total-val">—</span></div>
+
+      <!-- Coupon -->
+      <div style="margin-top:20px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:10px;">Discount Code</div>
+        <div class="coupon-row">
+          <input class="coupon-input" type="text" placeholder="Enter code…" id="coupon-input"/>
+          <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div id="coupon-msg" style="font-size:11px;margin-top:8px;display:none;"></div>
+      </div>
+    </div>
+
+    <a href="checkout.html" class="btn btn-primary btn-full" style="justify-content:center;margin-top:20px;font-size:13px;padding:18px;">
+      Proceed to Checkout
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;">
+      <svg width="14" height="14" fill="none" stroke="var(--stone)" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span style="font-size:11px;color:var(--stone);">Secure Payment — SSL Encrypted</span>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+      <span style="border:1px solid var(--fog);padding:4px 10px;font-size:10px;color:var(--stone);letter-spacing:.1em;">VISA</span>
+      <span style="border:1px solid var(--fog);padding:4px 10px;font-size:10px;color:var(--stone);letter-spacing:.1em;">MASTERCARD</span>
+      <span style="border:1px solid var(--fog);padding:4px 10px;font-size:10px;color:var(--stone);letter-spacing:.1em;">PAYPAL</span>
+      <span style="border:1px solid var(--fog);padding:4px 10px;font-size:10px;color:var(--stone);letter-spacing:.1em;">COD</span>
+    </div>
+
+    <div class="divider" style="margin:24px 0;"></div>
+
+    <div style="font-size:12px;color:var(--stone);line-height:1.7;text-align:center;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:inline;margin-bottom:-2px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Free returns &amp; refunds within 14 days
+    </div>
+
+    <!-- Also bought -->
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--fog);">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:16px;">Customers Also Bought</div>
+      <div style="display:flex;gap:12px;align-items:center;padding:12px;background:var(--white);">
+        <img src="https://placehold.co/60x80/6e6353/f4f3ef?text=" alt="" style="width:60px;height:80px;object-fit:cover;"/>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--ink);">Silk Blend Camisole</div>
+          <div style="font-size:13px;font-family:'Anton',sans-serif;color:var(--brown);margin-top:4px;">EGP 890</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;white-space:nowrap;">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+let cartData = null;
+let couponDiscount = 0;
+let couponCode = null;
+
+async function loadCart() {
+  if (!FashionAPI.isLoggedIn()) {
+    // Show empty cart for guests
+    document.getElementById('cart-items-container').innerHTML = `
+      <div class="cart-empty" style="text-align:center;padding:80px 40px;">
+        <svg width="64" height="64" fill="none" stroke="var(--pebble)" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 24px;display:block;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <h2 style="font-family:Anton,sans-serif;font-size:28px;color:var(--ink);margin-bottom:12px;">YOUR CART IS EMPTY</h2>
+        <p style="font-size:13px;color:var(--stone);margin-bottom:28px;">Sign in to see your saved cart items.</p>
+        <a href="login.html" class="btn btn-primary" style="display:inline-flex;">Sign In</a>
+      </div>`;
+    document.getElementById('cart-item-count').textContent = '0 items';
+    updateSummary({ subtotal: 0, shipping: 0, total: 0, item_count: 0, items: [] });
+    return;
+  }
+  document.getElementById('cart-loading') && (document.getElementById('cart-loading').style.display = '');
+  try {
+    cartData = await FashionAPI.get('/cart');
+    renderCart(cartData);
+    updateSummary(cartData);
+    window.fashionAI?.updateCartCount(cartData.item_count);
+  } catch(e) {
+    document.getElementById('cart-items-container').innerHTML =
+      '<p style="color:var(--danger);padding:40px;text-align:center;">Could not load cart. Is the backend running?</p>';
+  }
+}
+
+function renderCart(cart) {
+  const container = document.getElementById('cart-items-container');
+  document.getElementById('cart-item-count').textContent = cart.item_count + ' item' + (cart.item_count !== 1 ? 's' : '');
+  if (cart.items.length === 0) {
+    container.innerHTML = `<div class="cart-empty" style="text-align:center;padding:80px 40px;">
+      <svg width="64" height="64" fill="none" stroke="var(--pebble)" stroke-width="1" viewBox="0 0 24 24" style="margin:0 auto 24px;display:block;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <h2 style="font-family:Anton,sans-serif;font-size:28px;color:var(--ink);margin-bottom:12px;">YOUR CART IS EMPTY</h2>
+      <p style="font-size:13px;color:var(--stone);margin-bottom:28px;">Discover something you'll love.</p>
+      <a href="catalog.html" class="btn btn-primary" style="display:inline-flex;">Explore Catalog</a>
+    </div>`;
+    return;
+  }
+  container.innerHTML = cart.items.map(item => {
+    const img = item.product.image || `https://placehold.co/300x400/d1d0cb/6e6353?text=${encodeURIComponent(item.product.name)}`;
+    const price = item.product.sale_price ?? item.product.price;
+    return `<div class="cart-item" data-item-id="${item.id}">
+      <div class="cart-item-img"><img src="${img}" alt="${item.product.name}"/></div>
+      <div>
+        <div style="font-size:10px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--stone);margin-bottom:6px;">${item.product.brand}</div>
+        <a href="product.html?id=${item.product.id}" style="font-size:16px;font-weight:700;color:var(--ink);display:block;margin-bottom:8px;">${item.product.name}</a>
+        <div style="font-size:12px;color:var(--stone);margin-bottom:4px;">Size: ${item.size}</div>
+        <div style="font-size:12px;color:var(--stone);margin-bottom:20px;">Color: ${item.color}</div>
+        <div class="qty-stepper">
+          <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+          <span class="qty-val">${item.quantity}</span>
+          <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:Anton,sans-serif;font-size:22px;letter-spacing:.02em;color:var(--ink);margin-bottom:${item.product.sale_price ? '4px' : '16px'};"><span class="egp">EGP</span>${Number(price).toLocaleString()}</div>
+        ${item.product.sale_price ? `<div style="font-size:12px;color:var(--pebble);text-decoration:line-through;margin-bottom:12px;">EGP ${Number(item.product.price).toLocaleString()}</div>` : ''}
+        <button class="remove-btn" onclick="removeItem(${item.id})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateSummary(cart) {
+  const sub      = cart.subtotal || 0;
+  const ship     = cart.shipping || 0;
+  const discount = couponDiscount || 0;
+  const total    = Math.max(0, sub + ship - discount);
+
+  document.getElementById('subtotal-label').textContent = `Subtotal (${cart.item_count || 0} items)`;
+  document.getElementById('subtotal-val').textContent   = FashionAPI.fmt(sub);
+  document.getElementById('shipping-val').textContent   = ship === 0 ? 'Free' : FashionAPI.fmt(ship);
+  document.getElementById('total-val').textContent      = FashionAPI.fmt(total);
+  document.getElementById('shipping-val').style.color   = ship === 0 ? 'var(--success)' : '';
+
+  if (discount > 0) {
+    document.getElementById('discount-line').style.display = '';
+    document.getElementById('discount-val').textContent    = '− ' + FashionAPI.fmt(discount);
+  } else {
+    document.getElementById('discount-line').style.display = 'none';
+  }
+}
+
+async function changeQty(itemId, delta) {
+  const item = cartData?.items.find(i => i.id === itemId);
+  if (!item) return;
+  const newQty = item.quantity + delta;
+  if (newQty < 1) { removeItem(itemId); return; }
+  try {
+    cartData = await FashionAPI.put('/cart/' + itemId, { quantity: newQty });
+    renderCart(cartData);
+    updateSummary(cartData);
+    window.fashionAI?.updateCartCount(cartData.item_count);
+  } catch(e) {
+    window.fashionAI?.toast(e.message, 'error');
+  }
+}
+
+async function removeItem(itemId) {
+  const row = document.querySelector(`[data-item-id="${itemId}"]`);
+  if (row) { row.style.transition='opacity .3s'; row.style.opacity='0'; }
+  try {
+    cartData = await FashionAPI.del('/cart/' + itemId);
+    renderCart(cartData);
+    updateSummary(cartData);
+    window.fashionAI?.updateCartCount(cartData.item_count);
+    window.fashionAI?.toast('Item removed');
+  } catch(e) {
+    window.fashionAI?.toast(e.message, 'error');
+  }
+}
+
+async function applyCoupon() {
+  const code = document.getElementById('coupon-input').value.trim();
+  const msg  = document.getElementById('coupon-msg');
+  msg.style.display = 'block';
+  try {
+    const data = await FashionAPI.post('/cart/apply-coupon', { code });
+    couponDiscount = data.discount;
+    couponCode     = code;
+    msg.style.color   = 'var(--success)';
+    msg.textContent   = `✓ Coupon applied — ${FashionAPI.fmt(data.discount)} off`;
+    updateSummary(cartData || { subtotal: 0, shipping: 0, item_count: 0, items: [] });
+  } catch(e) {
+    couponDiscount = 0; couponCode = null;
+    msg.style.color   = 'var(--danger)';
+    msg.textContent   = '✗ ' + e.message;
+    updateSummary(cartData || { subtotal: 0, shipping: 0, item_count: 0, items: [] });
+  }
+}
+
+document.querySelectorAll('.shipping-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.shipping-option').forEach(o => { o.classList.remove('selected'); o.querySelector('input').checked = false; });
+    opt.classList.add('selected'); opt.querySelector('input').checked = true;
+  });
+});
+
+loadCart();</script>
+</body>
+</html>

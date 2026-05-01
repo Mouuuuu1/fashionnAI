@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Checkout — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css" />
+<style>
+.checkout-layout { margin-top: var(--nav-h); display: grid; grid-template-columns: 1fr 400px; min-height: calc(100vh - var(--nav-h)); }
+.checkout-main { padding: 60px; border-right: 1px solid var(--fog); }
+.checkout-sidebar { background: var(--cream); padding: 60px 40px; position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto; }
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+.step-title { font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: -.01em; color: var(--ink); margin-bottom: 32px; }
+.saved-address { border: 1px solid var(--fog); padding: 20px; margin-bottom: 12px; cursor: none; transition: border-color .2s; position: relative; }
+.saved-address.selected { border-color: var(--brown); }
+.saved-address input { position: absolute; top: 18px; right: 18px; accent-color: var(--brown); }
+.addr-name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.addr-detail { font-size: 13px; color: var(--stone); line-height: 1.6; }
+.payment-card { border: 1px solid var(--fog); padding: 20px; margin-bottom: 12px; cursor: none; transition: border-color .2s; display: flex; align-items: center; gap: 16px; }
+.payment-card.selected { border-color: var(--brown); }
+.payment-logo { font-size: 10px; font-weight: 700; letter-spacing: .12em; border: 1px solid var(--fog); padding: 6px 10px; color: var(--stone); }
+.card-input-group { display: grid; grid-template-columns: 1fr 100px 100px; gap: 12px; }
+</style>
+</head>
+<body>
+<div class="checkout-layout">
+  <!-- Left: Steps -->
+  <div class="checkout-main">
+    <!-- Progress -->
+    <div class="checkout-steps" id="steps">
+      <div class="checkout-step done" data-step="1"><div class="checkout-step-num">✓</div><div class="checkout-step-label">Address</div></div>
+      <div class="checkout-step active" data-step="2"><div class="checkout-step-num">2</div><div class="checkout-step-label">Payment</div></div>
+      <div class="checkout-step" data-step="3"><div class="checkout-step-num">3</div><div class="checkout-step-label">Review</div></div>
+    </div>
+
+    <!-- Step 1: Address -->
+    <div class="step-panel" id="panel-1">
+      <h2 class="step-title">Delivery Address</h2>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:12px;">Saved Addresses</div>
+        <div class="saved-address selected"><input type="radio" name="addr" checked /><div class="addr-name">Sarah Mohamed</div><div class="addr-detail">15 Nile Street, Dokki, Giza<br/>Cairo, Egypt — 12311<br/>+20 123 456 7890</div></div>
+        <div class="saved-address"><input type="radio" name="addr" /><div class="addr-name">Work Office</div><div class="addr-detail">Nile Tower, Floor 8, Nile Corniche Road<br/>Cairo, Egypt — 11511<br/>+20 123 456 7890</div></div>
+      </div>
+
+      <div class="divider" style="margin:24px 0;"><span style="font-size:11px;color:var(--stone);background:var(--white);padding:0 16px;">or add a new address</span></div>
+
+      <div style="display:grid;gap:16px;">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Sara"/></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Ahmed"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Street Address</label><input class="form-input" type="text" placeholder="15 Nile Street, Apt 3"/></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Governorate</label><select class="form-select"><option>Cairo</option><option>Giza</option><option>Alexandria</option><option>Aswan</option><option>Luxor</option></select></div>
+          <div class="form-group"><label class="form-label">Postal Code</label><input class="form-input" type="text" placeholder="11511"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" type="tel" placeholder="+20 1XX XXX XXXX"/></div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="save-addr" />
+          <label class="checkbox-label" for="save-addr">Save this address</label>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:32px;justify-content:center;gap:10px;" onclick="goStep(2)">Next: Payment <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+
+    <!-- Step 2: Payment -->
+    <div class="step-panel active" id="panel-2">
+      <h2 class="step-title">Payment Method</h2>
+
+      <div class="payment-card selected" onclick="selectPayment(this)">
+        <input type="radio" name="pay" checked style="accent-color:var(--brown);" />
+        <div class="payment-logo">VISA / MC</div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Credit / Debit Card</div><div style="font-size:11px;color:var(--stone);">Visa, Mastercard, Meeza</div></div>
+      </div>
+
+      <div style="background:var(--cream);padding:24px;margin-bottom:12px;" id="card-form">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" type="text" placeholder="SARA AHMED"/></div>
+          <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" type="text" placeholder="•••• •••• •••• ••••" maxlength="19"/></div>
+          <div class="card-input-group">
+            <div class="form-group"><label class="form-label">Expiry Date</label><input class="form-input" type="text" placeholder="MM/YY"/></div>
+            <div class="form-group"><label class="form-label">CVV</label><input class="form-input" type="text" placeholder="•••" maxlength="4"/></div>
+          </div>
+          <div class="checkbox-group"><input type="checkbox" id="save-card"/><label class="checkbox-label" for="save-card">Save card for future purchases</label></div>
+        </div>
+      </div>
+
+      <div class="payment-card" onclick="selectPayment(this)">
+        <input type="radio" name="pay" style="accent-color:var(--brown);" />
+        <div class="payment-logo">PAYPAL</div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);">PayPal</div><div style="font-size:11px;color:var(--stone);">Pay via your PayPal account</div></div>
+      </div>
+
+      <div class="payment-card" onclick="selectPayment(this)">
+        <input type="radio" name="pay" style="accent-color:var(--brown);" />
+        <div class="payment-logo">COD</div>
+        <div><div style="font-size:13px;font-weight:600;color:var(--ink);">Cash on Delivery</div><div style="font-size:11px;color:var(--stone);">Pay in cash when your order arrives</div></div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:32px;">
+        <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="goStep(3)">Next: Review <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- Step 3: Review -->
+    <div class="step-panel" id="panel-3">
+      <h2 class="step-title">Review & Confirm</h2>
+      <div style="display:grid;gap:24px;margin-bottom:32px;">
+        <div style="background:var(--cream);padding:24px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:12px;">Delivery Address</div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">Sarah Mohamed</div>
+          <div style="font-size:13px;color:var(--stone);margin-top:4px;line-height:1.6;">15 Nile Street, Dokki, Giza, Cairo 12311</div>
+        </div>
+        <div style="background:var(--cream);padding:24px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:12px;">Payment Method</div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">VISA •••• 4242</div>
+        </div>
+        <div style="background:var(--cream);padding:24px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:16px;">Items (3)</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;gap:16px;align-items:center;"><img src="https://placehold.co/64x85/d1d0cb/6e6353?text=" alt="" style="width:64px;height:85px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">Oversized Linen Blazer</div><div style="font-size:11px;color:var(--stone);">M · Stone Beige · 1×</div></div><div style="font-family:'Anton',sans-serif;font-size:16px;color:var(--ink);">EGP 2,490</div></div>
+            <div style="display:flex;gap:16px;align-items:center;"><img src="https://placehold.co/64x85/a2a092/2e2e2e?text=" alt="" style="width:64px;height:85px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">Minimal Midi Slip Dress</div><div style="font-size:11px;color:var(--stone);">S · Black · 1×</div></div><div style="font-family:'Anton',sans-serif;font-size:16px;color:var(--ink);">EGP 1,290</div></div>
+            <div style="display:flex;gap:16px;align-items:center;"><img src="https://placehold.co/64x85/8a887e/fafaf8?text=" alt="" style="width:64px;height:85px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">Wide-Leg Tailored Trousers</div><div style="font-size:11px;color:var(--stone);">M · Warm Stone · 1×</div></div><div style="font-family:'Anton',sans-serif;font-size:16px;color:var(--ink);">EGP 1,890</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;color:var(--stone);line-height:1.7;margin-bottom:20px;">By clicking "Place Order" you agree to our <a href="terms.html" style="text-decoration:underline;color:var(--brown);">Terms of Service</a> and confirm your details are correct.</div>
+
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+        <button id="place-order-btn" class="btn btn-primary" style="flex:1;justify-content:center;text-align:center;font-size:13px;padding:18px;" onclick="placeOrder()">
+          Place Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Summary -->
+  <div class="checkout-sidebar">
+    <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--stone);margin-bottom:20px;">Order Summary</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      <div style="display:flex;gap:12px;align-items:center;"><img src="https://placehold.co/56x74/d1d0cb/6e6353?text=" alt="" style="width:56px;height:74px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--ink);">Oversized Linen Blazer</div><div style="font-size:10px;color:var(--stone);">M · Stone Beige</div></div><div style="font-size:13px;font-weight:700;color:var(--ink);">EGP 2,490</div></div>
+      <div style="display:flex;gap:12px;align-items:center;"><img src="https://placehold.co/56x74/a2a092/2e2e2e?text=" alt="" style="width:56px;height:74px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--ink);">Minimal Midi Slip Dress</div><div style="font-size:10px;color:var(--stone);">S · Black</div></div><div style="font-size:13px;font-weight:700;color:var(--ink);">EGP 1,290</div></div>
+      <div style="display:flex;gap:12px;align-items:center;"><img src="https://placehold.co/56x74/8a887e/fafaf8?text=" alt="" style="width:56px;height:74px;object-fit:cover;"/><div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--ink);">Wide-Leg Trousers</div><div style="font-size:10px;color:var(--stone);">M · Warm Stone</div></div><div style="font-size:13px;font-weight:700;color:var(--ink);">EGP 1,890</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="order-summary" style="background:transparent;padding:0;">
+      <div class="summary-line"><span>Subtotal</span><span>EGP 5,670</span></div>
+      <div class="summary-line discount"><span>Discount</span><span>− EGP 600</span></div>
+      <div class="summary-line"><span>Shipping</span><span style="color:var(--success);">Free</span></div>
+      <div class="summary-line"><span>VAT (14%)</span><span>EGP 704</span></div>
+      <div class="summary-line total"><span>Total</span><span>EGP 5,774</span></div>
+    </div>
+    <div style="margin-top:24px;padding:16px;background:rgba(39,174,96,.08);border-left:3px solid var(--success);">
+      <div style="font-size:12px;font-weight:700;color:var(--success);">Free delivery unlocked!</div>
+      <div style="font-size:11px;color:var(--stone);margin-top:2px;">Arrives within 3–5 business days</div>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="components.js"></script>
+<script>
+if (!FashionAPI.requireAuth()) { /* redirecting */ }
+
+let cartData = null;
+let addressData = [];
+let selectedAddressId = null;
+let selectedPayment = 'card';
+
+async function initCheckout() {
+  await Promise.all([loadCart(), loadAddresses()]);
+}
+
+async function loadCart() {
+  try {
+    cartData = await FashionAPI.get('/cart');
+    renderSidebar();
+    renderReviewItems();
+  } catch(e) {}
+}
+
+function renderSidebar() {
+  if (!cartData) return;
+  const items = cartData.items || [];
+
+  // Rebuild sidebar item list
+  const listEl = document.querySelector('.checkout-sidebar [style*="flex-direction:column;gap:12px"]');
+  if (listEl) {
+    listEl.innerHTML = items.map(i => {
+      const p = i.product || i;
+      const price = p.sale_price ?? p.price;
+      const img = p.image || `https://placehold.co/56x74/d1d0cb/6e6353?text=`;
+      return `<div style="display:flex;gap:12px;align-items:center;">
+        <img src="${img}" alt="${p.name}" style="width:56px;height:74px;object-fit:cover;"/>
+        <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--ink);">${p.name}</div><div style="font-size:10px;color:var(--stone);">${i.size||''} · ${i.color||''} · ${i.quantity}×</div></div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink);">EGP ${Number(price * i.quantity).toLocaleString()}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Summary
+  const subtotal = cartData.subtotal || 0;
+  const discount = cartData.discount || 0;
+  const shipping = cartData.shipping || 0;
+  const total = cartData.total || 0;
+  const sumLines = document.querySelectorAll('.summary-line');
+  if (sumLines.length >= 4) {
+    sumLines[0].querySelector('span:last-child').textContent = FashionAPI.fmt(subtotal);
+    sumLines[1].querySelector('span:last-child').textContent = discount > 0 ? `− EGP ${Number(discount).toLocaleString()}` : 'EGP 0';
+    sumLines[2].querySelector('span:last-child').innerHTML = shipping === 0 ? '<span style="color:var(--success);">Free</span>' : FashionAPI.fmt(shipping);
+    const totalLine = document.querySelector('.summary-line.total span:last-child');
+    if (totalLine) totalLine.textContent = FashionAPI.fmt(total);
+    // Update place order button
+    const placeBtn = document.getElementById('place-order-btn');
+    if (placeBtn) placeBtn.textContent = `Place Order — ${FashionAPI.fmt(total)}`;
+  }
+}
+
+async function loadAddresses() {
+  try {
+    addressData = await FashionAPI.get('/users/me/addresses');
+    renderAddresses();
+  } catch(e) {}
+}
+
+function renderAddresses() {
+  const addrContainer = document.querySelector('#panel-1 [style*="Saved Addresses"] + div, #panel-1 .saved-address')?.parentElement;
+  if (!addrContainer || addressData.length === 0) return;
+  addrContainer.innerHTML = addressData.map((a, i) => {
+    const fullName = `${a.first_name||''} ${a.last_name||''}`.trim() || a.label || 'Address';
+    return `<div class="saved-address ${i===0?'selected':''}" onclick="selectAddress(this, ${a.id})" style="cursor:pointer;">
+      <input type="radio" name="addr" ${i===0?'checked':''} style="position:absolute;top:18px;right:18px;accent-color:var(--brown);"/>
+      <div class="addr-name">${a.label ? a.label + ' — ' + fullName : fullName}</div>
+      <div class="addr-detail">${a.street||''}<br/>${a.governorate||a.city||''}, Egypt — ${a.postal_code||''}<br/>${a.phone||''}</div>
+    </div>`;
+  }).join('');
+  if (addressData[0]) { selectedAddressId = addressData[0].id; updateReviewAddress(addressData[0]); }
+}
+
+function selectAddress(el, id) {
+  document.querySelectorAll('.saved-address').forEach(a => { a.classList.remove('selected'); a.querySelector('input').checked = false; });
+  el.classList.add('selected'); el.querySelector('input').checked = true;
+  selectedAddressId = id;
+  const addr = addressData.find(a => a.id === id);
+  if (addr) updateReviewAddress(addr);
+}
+
+function updateReviewAddress(addr) {
+  const reviewAddrName = document.querySelector('#panel-3 [style*="Delivery Address"] + div');
+  const reviewAddrDetail = document.querySelector('#panel-3 [style*="Delivery Address"] + div + div');
+  const name = `${addr.first_name||''} ${addr.last_name||''}`.trim() || addr.label || '';
+  if (reviewAddrName) reviewAddrName.textContent = name;
+  if (reviewAddrDetail) reviewAddrDetail.textContent = `${addr.street||''}, ${addr.governorate||addr.city||''}, Egypt ${addr.postal_code||''}`;
+}
+
+function renderReviewItems() {
+  if (!cartData) return;
+  const items = cartData.items || [];
+  const itemsBox = document.querySelector('#panel-3 [style*="Items"]');
+  if (!itemsBox) return;
+  const countLabel = itemsBox.querySelector('[style*="uppercase"][style*="stone"]');
+  if (countLabel) countLabel.textContent = `Items (${items.length})`;
+  const itemsList = itemsBox.querySelector('[style*="flex-direction:column;gap:14px"]');
+  if (itemsList) {
+    itemsList.innerHTML = items.map(i => {
+      const p = i.product || i;
+      const price = p.sale_price ?? p.price;
+      const img = p.image || `https://placehold.co/64x85/d1d0cb/6e6353?text=`;
+      return `<div style="display:flex;gap:16px;align-items:center;">
+        <img src="${img}" alt="${p.name}" style="width:64px;height:85px;object-fit:cover;"/>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--ink);">${p.name}</div><div style="font-size:11px;color:var(--stone);">${i.size||''} · ${i.color||''} · ${i.quantity}×</div></div>
+        <div style="font-family:'Anton',sans-serif;font-size:16px;color:var(--ink);">EGP ${Number(price * i.quantity).toLocaleString()}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+async function placeOrder() {
+  const btn = document.getElementById('place-order-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Placing Order…'; }
+
+  // Build shipping address from saved address or new form fields
+  let shipping_address = null;
+  if (selectedAddressId) {
+    const addr = addressData.find(a => a.id === selectedAddressId);
+    if (addr) shipping_address = {
+      name: `${addr.first_name||''} ${addr.last_name||''}`.trim(),
+      street: addr.street || '',
+      city: addr.governorate || addr.city || '',
+      postal_code: addr.postal_code || '',
+      phone: addr.phone || ''
+    };
+  }
+  if (!shipping_address) shipping_address = buildNewAddress();
+  if (!shipping_address) {
+    window.fashionAI?.toast('Please select or enter a delivery address', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+    return;
+  }
+
+  try {
+    const order = await FashionAPI.post('/orders', { payment_method: selectedPayment, shipping_address });
+    location.href = `order-confirmation.html?id=${order.order.id}&num=${encodeURIComponent(order.order.order_number)}`;
+  } catch(e) {
+    window.fashionAI?.toast(e.message || 'Could not place order', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+  }
+}
+
+function buildNewAddress() {
+  const firstName = document.querySelector('#panel-1 input[placeholder="Sara"]')?.value;
+  const lastName = document.querySelector('#panel-1 input[placeholder="Ahmed"]')?.value;
+  const street = document.querySelector('#panel-1 input[placeholder="15 Nile Street, Apt 3"]')?.value;
+  const gov = document.querySelector('#panel-1 select')?.value;
+  const postal = document.querySelector('#panel-1 input[placeholder="11511"]')?.value;
+  const phone = document.querySelector('#panel-1 input[type="tel"]')?.value;
+  if (firstName || street) return { name: `${firstName||''} ${lastName||''}`.trim(), street, city: gov, postal_code: postal, phone };
+  return null;
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.querySelectorAll('.checkout-step').forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i + 1 < n) { s.classList.add('done'); s.querySelector('.checkout-step-num').textContent = '✓'; }
+    else if (i + 1 === n) { s.classList.add('active'); s.querySelector('.checkout-step-num').textContent = n; }
+    else { s.querySelector('.checkout-step-num').textContent = i + 1; }
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function selectPayment(el) {
+  document.querySelectorAll('.payment-card').forEach(c => { c.classList.remove('selected'); c.querySelector('input').checked = false; });
+  el.classList.add('selected'); el.querySelector('input').checked = true;
+  const logo = el.querySelector('.payment-logo')?.textContent?.trim().toLowerCase();
+  if (logo?.includes('cod')) selectedPayment = 'cod';
+  else if (logo?.includes('paypal')) selectedPayment = 'paypal';
+  else selectedPayment = 'card';
+}
+
+initCheckout();
+</script>
+</body>
+</html>

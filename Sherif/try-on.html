@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Virtual Try-On — FashionAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css"/>
+<style>
+.tryon-page { margin-top: var(--nav-h); min-height: calc(100vh - var(--nav-h)); background: var(--ink); }
+.tryon-header { padding: 60px 60px 40px; border-bottom: 1px solid rgba(209,208,203,.1); display: flex; align-items: center; justify-content: space-between; }
+.tryon-layout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; min-height: calc(100vh - 200px); }
+.tryon-panel { padding: 48px 40px; display: flex; flex-direction: column; }
+.panel-num { font-family: 'Anton', sans-serif; font-size: 11px; letter-spacing: .25em; color: var(--brown); margin-bottom: 12px; }
+.panel-title { font-family: 'Anton', sans-serif; font-size: 28px; letter-spacing: -.01em; color: var(--white); margin-bottom: 8px; }
+.panel-desc { font-size: 13px; color: var(--stone); line-height: 1.7; margin-bottom: 32px; }
+.panel-divider { width: 1px; background: rgba(209,208,203,.1); }
+.upload-zone-dark { border: 2px dashed rgba(209,208,203,.2); background: rgba(255,255,255,.03); display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 300px; transition: border-color .2s, background .2s; position: relative; }
+.upload-zone-dark:hover, .upload-zone-dark.drag { border-color: var(--brown); background: rgba(110,99,83,.08); }
+.upload-zone-dark.has-image { border-color: var(--brown); border-style: solid; }
+.guide-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.silhouette { width: 80px; opacity: .15; }
+.tips-modal { background: rgba(46,46,46,.95); backdrop-filter: blur(12px); border: 1px solid rgba(209,208,203,.1); padding: 32px; margin-top: 16px; }
+.tip-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(209,208,203,.08); }
+.tip-item:last-child { border-bottom: none; }
+.quality-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; margin-top: 12px; }
+.quality-good { background: rgba(39,174,96,.15); color: var(--success); border: 1px solid rgba(39,174,96,.3); }
+.quality-fair { background: rgba(110,99,83,.2); color: var(--pebble); border: 1px solid rgba(110,99,83,.3); }
+.garment-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.garment-option { border: 1px solid rgba(209,208,203,.12); padding: 10px; cursor: none; transition: border-color .2s; display: flex; gap: 10px; align-items: center; }
+.garment-option.selected { border-color: var(--brown); background: rgba(110,99,83,.1); }
+.garment-option img { width: 48px; height: 64px; object-fit: cover; }
+.garment-name { font-size: 11px; font-weight: 600; color: var(--fog); }
+.garment-price { font-size: 11px; color: var(--stone); margin-top: 2px; }
+.result-area { flex: 1; min-height: 300px; position: relative; background: rgba(255,255,255,.03); border: 1px solid rgba(209,208,203,.08); display: flex; align-items: center; justify-content: center; }
+.result-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 100%; height: 100%; }
+.comparison-pane { position: relative; overflow: hidden; }
+.comparison-pane img { width: 100%; height: 100%; object-fit: cover; }
+.comparison-label { position: absolute; bottom: 10px; left: 10px; background: rgba(46,46,46,.8); backdrop-filter: blur(4px); padding: 5px 10px; font-size: 9px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--fog); }
+.processing-overlay { position: absolute; inset: 0; background: rgba(46,46,46,.85); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+.processing-ring { width: 56px; height: 56px; border: 2px solid rgba(255,255,255,.1); border-top-color: var(--brown); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.processing-text { font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--fog); }
+.processing-eta { font-size: 11px; color: var(--stone); }
+.result-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="tryon-page">
+  <!-- Header -->
+  <div class="tryon-header">
+    <div>
+      <div style="font-size:10px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--brown);margin-bottom:8px;display:flex;align-items:center;gap:12px;"><span style="width:24px;height:1px;background:var(--brown);display:inline-block;"></span>AI Feature</div>
+      <h1 style="font-family:'Anton',sans-serif;font-size:40px;letter-spacing:-.02em;color:var(--white);">VIRTUAL TRY-ON</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:24px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(110,99,83,.2);border:1px solid rgba(110,99,83,.35);border-radius:100px;padding:8px 16px;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--fog);">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse-dot 2s infinite;display:inline-block;"></span>
+        AI Engine Online
+      </div>
+      <a href="profile.html#try-ons" class="btn btn-ghost dark btn-sm">My Try-Ons</a>
+    </div>
+  </div>
+
+  <!-- 3-panel layout -->
+  <div class="tryon-layout">
+
+    <!-- Panel 1: Upload -->
+    <div class="tryon-panel" style="background:rgba(0,0,0,.2);">
+      <div class="panel-num">STEP 01</div>
+      <div class="panel-title">Upload Your Photo</div>
+      <div class="panel-desc">Upload a full-body photo standing straight, facing forward, with a clear background for best results.</div>
+
+      <div class="upload-zone-dark" id="upload-zone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <div class="guide-overlay">
+          <svg class="silhouette" viewBox="0 0 80 200" fill="none" stroke="rgba(209,208,203,.4)" stroke-width="1.5">
+            <circle cx="40" cy="20" r="16"/>
+            <path d="M20 50 Q40 45 60 50 L65 120 H55 L50 90 L50 180 H45 V130 H40 V130 H35 V180 H30 V90 L25 120 H15 Z"/>
+          </svg>
+        </div>
+        <svg width="32" height="32" fill="none" stroke="rgba(162,160,146,.5)" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom:12px;position:relative;z-index:1;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div style="font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);position:relative;z-index:1;">Drop photo here</div>
+        <div style="font-size:11px;color:var(--pebble);margin-top:6px;position:relative;z-index:1;">JPEG or PNG · Max 10 MB</div>
+        <input type="file" accept="image/*" style="display:none;" id="photo-input" onchange="handleUpload(this)"/>
+        <button class="btn btn-ghost dark btn-sm" style="margin-top:20px;position:relative;z-index:1;" onclick="document.getElementById('photo-input').click()">Browse Files</button>
+      </div>
+
+      <div id="quality-indicator" style="display:none;" class="quality-badge quality-good">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Good Quality — Ready to Process
+      </div>
+
+      <!-- Tips -->
+      <button onclick="document.getElementById('tips').classList.toggle('hidden')" style="display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--stone);font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;margin-top:16px;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Photo Tips
+      </button>
+      <div id="tips" class="tips-modal hidden">
+        <div class="tip-item"><span style="font-size:16px;">📏</span><span style="font-size:12px;color:var(--stone);">Full body visible from head to toe</span></div>
+        <div class="tip-item"><span style="font-size:16px;">👤</span><span style="font-size:12px;color:var(--stone);">Facing forward, arms slightly away from body</span></div>
+        <div class="tip-item"><span style="font-size:16px;">☀️</span><span style="font-size:12px;color:var(--stone);">Good lighting, avoid harsh shadows</span></div>
+        <div class="tip-item"><span style="font-size:16px;">🎨</span><span style="font-size:12px;color:var(--stone);">Plain or neutral background preferred</span></div>
+        <div class="tip-item"><span style="font-size:16px;">👗</span><span style="font-size:12px;color:var(--stone);">Fitted clothing for accurate sizing</span></div>
+      </div>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- Panel 2: Select Garment -->
+    <div class="tryon-panel">
+      <div class="panel-num">STEP 02</div>
+      <div class="panel-title">Select Garment</div>
+      <div class="panel-desc">Choose any garment from our catalog to try on. You can also try it on directly from any product page.</div>
+
+      <!-- Search -->
+      <div style="display:flex;gap:0;margin-bottom:20px;">
+        <div style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(209,208,203,.15);border-right:none;padding:10px 16px;">
+          <svg width="14" height="14" fill="none" stroke="var(--stone)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search garments…" style="background:none;border:none;outline:none;font-size:13px;color:var(--white);width:100%;font-family:'Quicksand',sans-serif;" placeholder-color="var(--stone)"/>
+        </div>
+        <button class="btn btn-brown btn-sm" style="border-radius:0;white-space:nowrap;">Search</button>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:0;border-bottom:1px solid rgba(209,208,203,.1);margin-bottom:16px;">
+        <button class="tab active" style="color:var(--fog);border-bottom-color:var(--brown);">All</button>
+        <button class="tab" style="color:var(--stone);border-bottom-color:transparent;">Women</button>
+        <button class="tab" style="color:var(--stone);border-bottom-color:transparent;">Men</button>
+        <button class="tab" style="color:var(--stone);border-bottom-color:transparent;">Saved</button>
+      </div>
+
+      <!-- Garment grid -->
+      <div class="garment-select-grid" style="flex:1;overflow-y:auto;">
+        <div class="garment-option selected" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/d1d0cb/6e6353?text=" alt=""/>
+          <div><div class="garment-name">Linen Blazer</div><div class="garment-price">EGP 2,490</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/a2a092/2e2e2e?text=" alt=""/>
+          <div><div class="garment-name">Midi Dress</div><div class="garment-price">EGP 1,290</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/8a887e/fafaf8?text=" alt=""/>
+          <div><div class="garment-name">Wide Trousers</div><div class="garment-price">EGP 1,890</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/6e6353/f4f3ef?text=" alt=""/>
+          <div><div class="garment-name">Wool Overcoat</div><div class="garment-price">EGP 5,490</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/d1d0cb/8a887e?text=" alt=""/>
+          <div><div class="garment-name">Maxi Skirt</div><div class="garment-price">EGP 1,490</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/2e2e2e/d1d0cb?text=" alt=""/>
+          <div><div class="garment-name">Silk Camisole</div><div class="garment-price">EGP 890</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/a2a092/6e6353?text=" alt=""/>
+          <div><div class="garment-name">Knit Cardigan</div><div class="garment-price">EGP 1,190</div></div>
+        </div>
+        <div class="garment-option" onclick="selectGarment(this)">
+          <img src="https://placehold.co/96x128/8a887e/2e2e2e?text=" alt=""/>
+          <div><div class="garment-name">Wrap Dress</div><div class="garment-price">EGP 1,650</div></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-full" style="margin-top:20px;justify-content:center;font-size:13px;padding:18px;" id="generate-btn" onclick="startGeneration()">
+        Generate Try-On
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- Panel 3: Result -->
+    <div class="tryon-panel" style="background:rgba(0,0,0,.2);">
+      <div class="panel-num">STEP 03</div>
+      <div class="panel-title">Your Result</div>
+      <div class="panel-desc">AI-generated preview. Side-by-side comparison with the original product photo.</div>
+
+      <div class="result-area" id="result-area">
+        <!-- Default state -->
+        <div id="result-empty" style="text-align:center;padding:40px;">
+          <svg width="48" height="48" fill="none" stroke="rgba(162,160,146,.3)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px;display:block;"><circle cx="12" cy="8" r="5"/><path d="M3 21a9 9 0 0 1 18 0"/></svg>
+          <p style="font-size:12px;color:var(--stone);line-height:1.7;">Upload a photo and select a garment<br/>to generate your try-on preview.</p>
+          <p style="font-size:10px;color:var(--pebble);margin-top:8px;">Processing takes ~15 seconds</p>
+        </div>
+
+        <!-- Processing state (hidden by default) -->
+        <div id="result-processing" class="processing-overlay" style="display:none;">
+          <div class="processing-ring"></div>
+          <div class="processing-text">Generating Preview…</div>
+          <div class="processing-eta">Estimated time: 15 seconds</div>
+          <div style="width:200px;height:2px;background:rgba(255,255,255,.08);overflow:hidden;border-radius:1px;">
+            <div id="progress-fill" style="height:100%;width:0%;background:var(--brown);transition:width .5s;border-radius:1px;"></div>
+          </div>
+        </div>
+
+        <!-- Result state (hidden by default) -->
+        <div id="result-done" class="result-comparison" style="display:none;">
+          <div class="comparison-pane"><img src="https://placehold.co/400x533/a2a092/2e2e2e?text=Your+Photo" alt="Your Photo"/><div class="comparison-label">Your Photo</div></div>
+          <div class="comparison-pane"><img src="https://placehold.co/400x533/d1d0cb/6e6353?text=AI+Preview" alt="AI Preview"/><div class="comparison-label">AI Preview</div></div>
+        </div>
+      </div>
+
+      <div class="result-actions" id="result-actions" style="display:none;">
+        <button class="btn btn-brown btn-sm" style="flex:1;justify-content:center;">Save to My Try-Ons</button>
+        <button class="btn btn-ghost dark btn-sm" style="justify-content:center;" onclick="share()">Share</button>
+        <a href="product.html" class="btn btn-primary btn-sm" style="justify-content:center;flex:1;">Buy This Look</a>
+      </div>
+
+      <div id="result-retry" style="display:none;margin-top:12px;">
+        <button class="btn btn-ghost dark btn-sm btn-full" style="justify-content:center;" onclick="startGeneration()">Try Again</button>
+      </div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(209,208,203,.08);">
+        <div style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">Privacy Promise</div>
+        <p style="font-size:11px;color:rgba(162,160,146,.7);line-height:1.7;">Your photos are securely stored, never shared with third parties, and deleted on request. EXIF metadata is stripped on upload.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="components.js"></script>
+<script>
+function handleUpload(input) {
+  if (!input.files[0]) return;
+  const zone = document.getElementById('upload-zone');
+  const reader = new FileReader();
+  reader.onload = e => {
+    zone.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>`;
+    zone.classList.add('has-image');
+    document.getElementById('quality-indicator').style.display = 'inline-flex';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+function handleDrop(e) {
+  e.preventDefault();
+  const zone = document.getElementById('upload-zone');
+  zone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const fake = { files: [file], onchange: null };
+    const reader = new FileReader();
+    reader.onload = ev => {
+      zone.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>`;
+      zone.classList.add('has-image');
+      document.getElementById('quality-indicator').style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+function selectGarment(el) {
+  document.querySelectorAll('.garment-option').forEach(g => g.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function startGeneration() {
+  document.getElementById('result-empty').style.display = 'none';
+  document.getElementById('result-done').style.display = 'none';
+  document.getElementById('result-actions').style.display = 'none';
+  document.getElementById('result-retry').style.display = 'none';
+  document.getElementById('result-processing').style.display = 'flex';
+  const fill = document.getElementById('progress-fill');
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 8, 95);
+    fill.style.width = pct + '%';
+  }, 500);
+  setTimeout(() => {
+    clearInterval(interval);
+    fill.style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('result-processing').style.display = 'none';
+      document.getElementById('result-done').style.display = 'grid';
+      document.getElementById('result-actions').style.display = 'flex';
+    }, 400);
+  }, 4000);
+}
+function share() {
+  navigator.clipboard.writeText(location.href + '?shared=1').then(() => alert('Shareable link copied! Valid for 7 days.'));
+}
+</script>
+</body>
+</html>
